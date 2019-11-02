@@ -114,8 +114,6 @@ namespace LibriaDbSync
 
         public string Title { get; set; }
 
-        //public Dictionary<string, string> Links { get; set; }
-
         public Release Release { get; set; }
     }
 
