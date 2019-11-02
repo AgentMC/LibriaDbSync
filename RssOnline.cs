@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -54,11 +54,11 @@ namespace LibriaDbSync
             }
 
             var ch = new XElement("channel",
-                        new XElement("title", "Anilibria — так звучит аниме!"),
+                        new XElement("title", "Anilibria вЂ” С‚Р°Рє Р·РІСѓС‡РёС‚ Р°РЅРёРјРµ!"),
                         new XElement("link", "https://www.anilibria.tv"),
-                        new XElement("description", "Неофициальная RSS-лента по сайту Anilibria.tv"),
+                        new XElement("description", "РќРµРѕС„РёС†РёР°Р»СЊРЅР°СЏ RSS-Р»РµРЅС‚Р° РїРѕ СЃР°Р№С‚Сѓ Anilibria.tv"),
                         new XElement("language", "ru-ru"),
-                        new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
+                        new XElement("copyright", "Р’СЃРµ РїСЂР°РІР° РЅР° РєРѕРЅС‚РµРЅС‚ РІ СЌС‚РѕРј РєР°РЅР°Р»Рµ РїСЂРёРЅР°РґР»РµР¶Р°С‚ СЃР°Р№С‚Сѓ Anilibria.tv. Р’СЃРµ РїСЂР°РІР° РЅР° РєРѕРґ СЃРёРЅС…СЂРѕРЅРёР·Р°С‚РѕСЂР° Р±Р°Р·С‹ Рё РіРµРЅРµСЂР°С‚РѕСЂР° Р»РµРЅС‚С‹ РїСЂРёРЅР°РґР»РµР¶Р°С‚ AgentMC."),
                         new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
                         new XElement("lastBuildDate", content[0].Release.GetLastEpisodeUpdate().ToString("R")),
                         new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
@@ -66,7 +66,7 @@ namespace LibriaDbSync
                         new XElement("ttl", "15"),
                         new XElement("image", 
                             new XElement("url", "https://static.anilibria.tv/img/footer.png"),
-                            new XElement("title", "Anilibria — Спасибо, что выбираете нас!"),
+                            new XElement("title", "Anilibria вЂ” РЎРїР°СЃРёР±Рѕ, С‡С‚Рѕ РІС‹Р±РёСЂР°РµС‚Рµ РЅР°СЃ!"),
                             new XElement("link", "https://www.anilibria.tv")));
 
             foreach (var episode in content)
@@ -89,13 +89,13 @@ namespace LibriaDbSync
             {"{releasetitle}",  e => string.Join(" / ", e.Release.names) },
             {"{episodetitle}",  e => e.Title },
             {"{season}",        e => $"{e.Release.season} {e.Release.year}" },
-            {"{state}",         e => e.Release.StatusCode == 1 ? "в работе" : "завершён" },
+            {"{state}",         e => e.Release.StatusCode == 1 ? "РІ СЂР°Р±РѕС‚Рµ" : "Р·Р°РІРµСЂС€С‘РЅ" },
             {"{genres}",        e => string.Join(", ", e.Release.genres) },
             {"{voicers}",       e => string.Join(", ", e.Release.voices) },
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Join(", ", e.Release.torrents.Select(t=>$@"<a href=""https://static.anilibria.tv{t.url}"">Серии {t.series} — {t.quality}</a>")) }
+            {"{torrentlinks}",  e => string.Join(", ", e.Release.torrents.Select(t=>$@"<a href=""https://static.anilibria.tv{t.url}"">РЎРµСЂРёРё {t.series} вЂ” {t.quality}</a>")) }
         };
 
         private static string BuildDescription(RssEntry episode)
