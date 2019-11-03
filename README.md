@@ -16,9 +16,9 @@ The feed is populated when the episodes show up *in the player*, and ignores whe
 Complies with RSS 2.0 specification. However, feed is not 100% compatible because of HTML content and some other details. Does not contain any other content than from Anilibria (i.e. no ads). Refresh frequency - 15 minutes.
 
 # Время добавления серии / Episode upload time
-К сожалению, API Анилибрии не возвращает время создания серии на сервере (в плеере), поэтому время добавления эпизода считается как время заливки самого свежего торрента — или время обновления релиза, в зависимости от того, что свежее. Поэтому время, которое отображает ваш RSS клиент не является моментом появления серии в плеере.
+К сожалению, API Анилибрии не возвращает время создания серии на сервере (в плеере), поэтому время добавления эпизода считается как время заливки самого свежего торрента — или время обновления релиза, в зависимости от того, что свежее. Также, если ни то, ни другое не находится в пределах 36 часов (серия появилась в плеере, а ни релиз не обновился, ни торрент не залили), то используется текущее время обнаружения нового эпизода. Поэтому время, которое отображает ваш RSS клиент не является моментом появления серии в плеере.
 
-Unfortunately, the Anilibria API does not return the episode creation timestamp, and the time the episode was added is calculated as the most recent torrent upload time — or the release update timestamp, if it's fresher. That's why the time your RSS client shows is not the moment the episode appeared in the player.
+Unfortunately, the Anilibria API does not return the episode creation timestamp, and the time the episode was added is calculated as the most recent torrent upload time — or the release update timestamp, if it's fresher. Also, if neither lies within 36 hours (an episode was added but neither release was updated nor new torrent uploaded), then the current timestamp is used. That's why the time your RSS client shows is not the moment the episode appeared in the player.
 
 # Architecture
  - Azure Sql DB
