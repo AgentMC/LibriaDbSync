@@ -16,6 +16,10 @@ namespace LibriaDbSync
             log.LogInformation($"Connection to DB opened successfully.");
             return connection;
         }
+
+        internal static DateTime ToDateTime(this long seconds) => new DateTime(1970, 1, 1).AddSeconds(seconds);
+
+        internal static long ToUnixTimeStamp(this DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
     }
     public class BlockedInfo
     {
@@ -81,9 +85,9 @@ namespace LibriaDbSync
         public List<Torrent> torrents { get; set; }
         public Favorite favorite { get; set; }
 
-        public DateTime GetLastEpisodeUpdate()
+        public long GetLastTorrentUpdateEpochSeconds()
         {
-            return new DateTime(1970, 1, 1).AddSeconds(torrents.Max(t => t.ctime));
+            return torrents.Count == 0 ? 0 : torrents.Max(t => t.ctime);
         }
     }
 
@@ -115,6 +119,8 @@ namespace LibriaDbSync
         public string Title { get; set; }
 
         public Release Release { get; set; }
+
+        public long Created { get; set; }
     }
 
 }

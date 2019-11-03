@@ -23,7 +23,7 @@ namespace LibriaDbSync
             {
                 using (var loader = conn.CreateCommand())
                 {
-                    loader.CommandText = @"SELECT TOP 24 Episodes.Id as Uid, Title, Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents
+                    loader.CommandText = @"SELECT TOP 24 Episodes.Id as Uid, Title, Created, Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents
                                            FROM Episodes JOIN Releases ON Releases.Id = ReleaseId
                                            ORDER BY Created DESC";
                     using (var rdr = await loader.ExecuteReaderAsync())
@@ -34,6 +34,7 @@ namespace LibriaDbSync
                             {
                                 Uid = (int)rdr["Uid"],
                                 Title = (string)rdr["Title"],
+                                Created = (long)rdr["Created"],
                                 Release = new Release
                                 {
                                     names = JsonConvert.DeserializeObject<List<string>>((string)rdr["Titles"]),
@@ -60,7 +61,7 @@ namespace LibriaDbSync
                         new XElement("language", "ru-ru"),
                         new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
                         new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
-                        new XElement("lastBuildDate", content[0].Release.GetLastEpisodeUpdate().ToString("R")),
+                        new XElement("lastBuildDate", content[0].Created.ToDateTime().ToString("R")),
                         new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
                         new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
                         new XElement("ttl", "15"),
@@ -75,7 +76,7 @@ namespace LibriaDbSync
                         new XElement("title", Processors["{maintitle}"](episode)),
                         new XElement("link", Processors["{releaselink}"](episode)),
                         new XElement("guid", new XAttribute("isPermaLink", "false"), episode.Uid.ToString()),
-                        new XElement("pubDate", episode.Release.GetLastEpisodeUpdate().ToString("R")),
+                        new XElement("pubDate", episode.Created.ToDateTime().ToString("R")),
                         new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), "GetLibriaRss - online"),
                         new XElement("description", BuildDescription(episode))));
             }

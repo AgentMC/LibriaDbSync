@@ -47,13 +47,14 @@ namespace LibriaDbSync
                 foreach (var release in model.data.items)
                 {
                     log.LogInformation($"+Processing release {release.id}, '{(release.names != null && release.names.Count > 0 ? release.names[0] : "Undefined")}', {release.playlist.Count} live episodes.");
-                    var maxEpisodeUpdate = Math.Max(release.torrents.Count == 0 ? 0 : release.torrents.Max(t => t.ctime), release.LastModified);
+                    var maxEpisodeUpdate = Math.Max(release.GetLastTorrentUpdateEpochSeconds(), release.LastModified);
                     var lastUpdated = GetLastUpdated(conn, release.id);
                     var releasesCount = GetReleasesCount(conn, release.id);
                     if (lastUpdated == null)
                     {
+                        log.LogInformation("++Proceeding. Reson: new.");
                         CreateRelease(conn, release.id, log);
-                        UpdateRelease(conn, release, log);
+                        UpdateRelease(conn, release, log, ref maxEpisodeUpdate);
                         foreach (var episode in release.playlist)
                         {
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
@@ -61,7 +62,8 @@ namespace LibriaDbSync
                     }
                     else if (lastUpdated.Value != release.LastModified || releasesCount != release.playlist.Count)
                     {
-                        var exisitng = UpdateRelease(conn, release, log);
+                        log.LogInformation($"++Proceeding. Reson: {(lastUpdated.Value != release.LastModified ? "release updated" : "episodes count changed")}.");
+                        var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate);
                         foreach (var episode in release.playlist.Where(e => !exisitng.Contains(e.id)))
                         {
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
@@ -102,7 +104,7 @@ namespace LibriaDbSync
             }
         }
 
-        private static List<int> UpdateRelease(SqlConnection conn, Release release, ILogger log)
+        private static List<int> UpdateRelease(SqlConnection conn, Release release, ILogger log, ref long lastEpisodeTimestamp)
         {
             log.LogInformation("++Updating the release entry...");
             var res = new List<int>();
@@ -144,6 +146,13 @@ namespace LibriaDbSync
                     }
                 }
             }
+
+            if ((DateTime.Now - lastEpisodeTimestamp.ToDateTime()).TotalHours > 36)
+            {
+                lastEpisodeTimestamp = DateTime.Now.ToUnixTimeStamp();
+                log.LogInformation($"+++No usable timestamp for new episodes. Using Now ({lastEpisodeTimestamp}).");
+            }
+
             log.LogInformation($"++Update complete. {res.Count} episodes found.");
             return res;
         }
