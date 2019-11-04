@@ -1,15 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using LibriaDbSync.Properties;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using LibriaDbSync.Properties;
 
 namespace LibriaDbSync
 {
@@ -65,7 +68,7 @@ namespace LibriaDbSync
                         new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
                         new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
                         new XElement("ttl", "15"),
-                        new XElement("image", 
+                        new XElement("image",
                             new XElement("url", "https://static.anilibria.tv/img/footer.png"),
                             new XElement("title", "Anilibria — Спасибо, что выбираете нас!"),
                             new XElement("link", "https://www.anilibria.tv")));
@@ -81,7 +84,13 @@ namespace LibriaDbSync
                         new XElement("description", BuildDescription(episode))));
             }
 
-            return new OkObjectResult(new XDocument(new XElement("rss", new XAttribute("version", "2.0"), ch)).ToString());
+            return new OkObjectResult(new XDocument(new XElement("rss", new XAttribute("version", "2.0"), ch)).ToString())
+            {
+                Formatters = new FormatterCollection<IOutputFormatter>
+                {
+                    new RssMediaFormatter()
+                }
+            };
         }
 
         private static readonly Dictionary<string, Func<RssEntry, string>> Processors = new Dictionary<string, Func<RssEntry, string>>
@@ -107,6 +116,22 @@ namespace LibriaDbSync
                 item = item.Replace(processor.Key, processor.Value(episode));
             }
             return item;
+        }
+    }
+
+    class RssMediaFormatter : TextOutputFormatter
+    {
+        public RssMediaFormatter()
+        {
+            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/rss+xml"));
+            SupportedEncodings.Add(Encoding.UTF8);
+            SupportedEncodings.Add(Encoding.Unicode);
+        }
+
+        public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+        {
+            context.ContentType = "application/rss+xml";
+            await context.HttpContext.Response.WriteAsync(context.Object.ToString());
         }
     }
 }
