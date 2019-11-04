@@ -96,7 +96,7 @@ namespace LibriaDbSync
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Join(", ", e.Release.torrents.Select(t=>$@"<a href=""https://static.anilibria.tv{t.url}"">Серии {t.series} — {t.quality}</a>")) }
+            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">Серии {t.series} [{t.quality}]</a></li>")) }
         };
 
         private static string BuildDescription(RssEntry episode)

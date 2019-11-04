@@ -61,12 +61,7 @@ namespace LibriaDbSync.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
-        ///&lt;html lang=&quot;en&quot; xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
-        ///&lt;head&gt;
-        ///    &lt;meta charset=&quot;utf-8&quot; /&gt;
-        ///    &lt;title&gt;{maintitle}&lt;/title&gt;
-        ///    &lt;style&gt;
+        ///   Looks up a localized string similar to     &lt;style&gt;
         ///        body {
         ///            font-family: &apos;Segoe UI&apos;, Calibri, &apos;Trebuchet MS&apos;, Verdana, Tahoma, Arial, sans-serif;
         ///        }
@@ -80,7 +75,11 @@ namespace LibriaDbSync.Properties {
         ///            font-weight: bold;
         ///        }
         ///        .watchname {
-        ///   [rest of string was truncated]&quot;;.
+        ///            font-weight: bold;
+        ///        }
+        ///    &lt;/style&gt;
+        ///    &lt;img class=&quot;poster&quot; src=&quot;https://static.anilibria.tv{poster}&quot; /&gt;
+        ///    &lt;H1&gt;{releaset [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ItemTemplate {
             get {
