@@ -65,6 +65,45 @@ CREATE NONCLUSTERED INDEX [IX_Episodes_Created] ON [dbo].[Episodes]
 	[Created] DESC
 )WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+/****** Object:  Table [dbo].[Torrents]    Script Date: 04.11.2019 21:41:05 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Torrents](
+	[Id] [int] NOT NULL,
+	[ReleaseId] [int] NOT NULL,
+	[Created] [bigint] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Torrents]  WITH CHECK ADD  CONSTRAINT [FK_Torrents_ToReleases] FOREIGN KEY([ReleaseId])
+REFERENCES [dbo].[Releases] ([Id])
+GO
+
+ALTER TABLE [dbo].[Torrents] CHECK CONSTRAINT [FK_Torrents_ToReleases]
+GO
+/****** Object:  Index [IX_Torrents_Created]    Script Date: 04.11.2019 21:41:30 ******/
+CREATE NONCLUSTERED INDEX [IX_Torrents_Created] ON [dbo].[Torrents]
+(
+	[Created] DESC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Torrents_ReleaseId]    Script Date: 04.11.2019 21:41:35 ******/
+CREATE NONCLUSTERED INDEX [IX_Torrents_ReleaseId] ON [dbo].[Torrents]
+(
+	[ReleaseId] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+
+
 
 
 
