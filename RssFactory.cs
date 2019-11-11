@@ -58,7 +58,7 @@ namespace LibriaDbSync
         private static Guid GetGlobalizedUid(RssEntry episode, string suffix)
         {
             var tmp = BaseGuid.ToByteArray();
-            var hash = suffix.GetHashCode();
+            var hash = SimpleStaticStringHashCode(suffix);
             tmp[08] = (byte)((hash & 0xFF000000) >> 24);
             tmp[09] = (byte)((hash & 0x00FF0000) >> 16);
             tmp[10] = (byte)((hash & 0x0000FF00) >> 8);
@@ -68,6 +68,24 @@ namespace LibriaDbSync
             tmp[14] = (byte)((episode.Uid & 0x0000FF00) >> 8);
             tmp[15] = (byte)( episode.Uid & 0x000000FF);
             return new Guid(tmp);
+        }
+
+        //dotnet core randomizes the base for GetHashCode, need custom impl.
+        private static uint SimpleStaticStringHashCode(string source)
+        {
+            if (string.IsNullOrEmpty(source)) return 0;
+            unchecked
+            {
+                var binmask = 0b10101010_01010101_10101010_01010101; //unnatural base
+                binmask ^= (byte)source.Length * (uint)0x01010101;   //clobe 1 byte to 4 of int and xor to base
+                for (int i = 0; i < source.Length; i++)
+                {
+                    uint character = (uint)(source[i] << i); //char code and position
+                    binmask ^= character;  //xor lower or higher 16 bit of the result for even or odd chars respectively
+                    binmask ^= character << 16; //and one more time, other bits
+                }
+                return binmask;
+            }
         }
 
         private static readonly Dictionary<string, Func<RssEntry, string>> Processors = new Dictionary<string, Func<RssEntry, string>>
