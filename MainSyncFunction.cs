@@ -171,16 +171,23 @@ namespace LibriaDbSync
                 }
             }
 
-            if ((DateTime.Now - lastEpisodeTimestamp.ToDateTime()).TotalHours > 36)
-            {
-                lastEpisodeTimestamp = DateTime.Now.ToUnixTimeStamp();
-                log.LogInformation($"+++No usable timestamp for new episodes. Using Now ({lastEpisodeTimestamp}).");
-            }
-
+            lastEpisodeTimestamp = CheckTimeStamp(lastEpisodeTimestamp, 36, "No usable timestamp for new episodes", log);
+            
             SynchronizeTorrentIndex(conn, release, existingTorrentIds ?? GetTorrentIds(conn, release.id), log);
 
             log.LogInformation($"++Update complete. {res.Count} episodes found.");
             return res;
+        }
+
+        private static long CheckTimeStamp(long testTimeStamp, float hoursThreshold, string thresholdMessage, ILogger log)
+        {
+            if ((DateTime.Now - testTimeStamp.ToDateTime()).TotalHours > hoursThreshold)
+            {
+                var properTimestamp = DateTime.Now.ToUnixTimeStamp();
+                log.LogInformation($"+++{thresholdMessage}. Using Now ({properTimestamp}).");
+                return properTimestamp;
+            }
+            return testTimeStamp;
         }
 
         private static void SynchronizeTorrentIndex(SqlConnection conn, Release release, List<int> existingIds, ILogger log)
@@ -199,12 +206,13 @@ namespace LibriaDbSync
             foreach (var torrent in release.torrents.Where(t => !existingIds.Contains(t.id)))
             {
                 log.LogInformation($"+++Creating torrent {torrent.id}.");
+                var createdTimestamp = CheckTimeStamp(torrent.ctime, 36, "Torrent date out of range. Clamping", log);
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = $"Insert into Torrents (Id, ReleaseId, Created) Values (@id, @release, @created)";
                     cmd.Parameters.AddWithValue("@id", torrent.id);
                     cmd.Parameters.AddWithValue("@release", release.id);
-                    cmd.Parameters.AddWithValue("@created", torrent.ctime);
+                    cmd.Parameters.AddWithValue("@created", createdTimestamp);
                     cmd.ExecuteNonQuery();
                 }
             }
