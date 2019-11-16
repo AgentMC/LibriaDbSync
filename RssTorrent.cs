@@ -36,9 +36,35 @@ namespace LibriaDbSync
                     }
                 }
             }
-            content.ForEach(r => { var tor = r.Release.torrents.Single(t => t.id == r.Uid); r.Title = $"Серии {tor.series} [{tor.quality}]"; });
+            content.ForEach(r => { var tor = r.Release.torrents.Single(t => t.id == r.Uid); r.Title = $"{GetPrefix(tor.series)}{tor.series} [{tor.quality}]"; });
 
             return RssFactory.BuildFeed(content, "торренты");
+        }
+
+        private static string GetPrefix(string episodeSetDescription)
+        {
+            int digitGroups = 0;
+            bool isDigit = false;
+            foreach (var c in episodeSetDescription)
+            {
+                if (char.IsDigit(c) != isDigit)
+                {
+                    isDigit = !isDigit;
+                    if (isDigit)
+                    {
+                        digitGroups++;
+                    }
+                }
+            }
+            switch (digitGroups)
+            {
+                case 0:
+                    return string.Empty;
+                case 1:
+                    return "Серия ";
+                default:
+                    return "Серии ";
+            }
         }
     }
 }

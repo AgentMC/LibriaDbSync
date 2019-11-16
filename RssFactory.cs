@@ -41,7 +41,7 @@ namespace LibriaDbSync
                         new XElement("link", Processors["{releaselink}"](episode)),
                         new XElement("guid", new XAttribute("isPermaLink", "false"), GetGlobalizedUid(episode, titleSuffix).ToString()),
                         new XElement("pubDate", episode.Created.ToDateTime().ToString("R")),
-                        new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), "GetLibriaRss - online"),
+                        new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), $"GetLibriaRss - {titleSuffix}"),
                         new XElement("description", BuildDescription(episode))));
             }
 
@@ -90,7 +90,7 @@ namespace LibriaDbSync
 
         private static readonly Dictionary<string, Func<RssEntry, string>> Processors = new Dictionary<string, Func<RssEntry, string>>
         {
-            {"{maintitle}",     e => $"{e.Release.names[0]} : {e.Title}" },
+            {"{maintitle}",     e => $"{e.Release.names[0]} · {e.Title}" },
             {"{releasetitle}",  e => string.Join(" / ", e.Release.names) },
             {"{episodetitle}",  e => e.Title },
             {"{season}",        e => $"{e.Release.season} {e.Release.year}" },
