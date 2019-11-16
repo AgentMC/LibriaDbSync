@@ -96,7 +96,7 @@ namespace LibriaDbSync
             {"{season}",        e => $"{e.Release.season} {e.Release.year}" },
             {"{state}",         e => e.Release.StatusCode == 1 ? "в работе" : "завершён" },
             {"{genres}",        e => string.Join(", ", e.Release.genres) },
-            {"{voicers}",       e => string.Join(", ", e.Release.voices) },
+            {"{voicers}",       e => string.Join(", ", e.Release.voices.Select(DeHtmlize)) },
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
@@ -113,6 +113,49 @@ namespace LibriaDbSync
             return item;
         }
 
+        private static string DeHtmlize(string source)
+        {
+            var lcs = source.ToLower();
+            var res = new StringBuilder();
+            for (int i = 0; i < lcs.Length; i++)
+            {
+                if(lcs[i] != '<')
+                {
+                    res.Append(source[i]);
+                }
+                else //i -> [<]
+                {
+                    int j = i + 1;
+                    while (j < lcs.Length && lcs[j] != ' ' && lcs[j] != '>') j++; //searching first space, '>' or eos
+                    if (j < lcs.Length && lcs[j] == '>') //tag detected, j -> [>]
+                    {
+                        if(lcs[j-1] == '/') //non-html self-closing tag
+                        {
+                            i = j; //shift the pointer to the next char after '>' on next iteration, i.e. ignore self-closed tag.
+                        } 
+                        else
+                        {
+                            var endTag = "</" + lcs.Substring(i + 1, j - i); //</tag>
+                            int k = lcs.IndexOf(endTag, j + 1); 
+                            if (k > -1) //tag closed, k -> [<]
+                            {
+                                i = k + endTag.Length -1; // i -> [>]
+                            }
+                            else //tag not closed, e.g. HTML <br>
+                            {
+                                i = j;
+                            }
+                        }
+                        while (i < lcs.Length - 1 && lcs[i + 1] == ' ') i++; //skipping spaces after tags
+                    }
+                    else //no tag
+                    {
+                        res.Append(source[i]);
+                    }
+                }
+            }
+            return res.ToString();
+        }
     }
 
     class RssMediaFormatter : TextOutputFormatter
