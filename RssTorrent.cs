@@ -4,13 +4,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LibriaDbSync
 {
     public static class RssTorrent
     {
+        public const string ClassId = "торренты";
+
         [FunctionName("RssTorrent")]
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req, ILogger log)
         {
@@ -36,35 +37,8 @@ namespace LibriaDbSync
                     }
                 }
             }
-            content.ForEach(r => { var tor = r.Release.torrents.Single(t => t.id == r.Uid); r.Title = $"{GetPrefix(tor.series)}{tor.series} [{tor.quality}]"; });
 
-            return RssFactory.BuildFeed(content, "торренты");
-        }
-
-        private static string GetPrefix(string episodeSetDescription)
-        {
-            int digitGroups = 0;
-            bool isDigit = false;
-            foreach (var c in episodeSetDescription)
-            {
-                if (char.IsDigit(c) != isDigit)
-                {
-                    isDigit = !isDigit;
-                    if (isDigit)
-                    {
-                        digitGroups++;
-                    }
-                }
-            }
-            switch (digitGroups)
-            {
-                case 0:
-                    return string.Empty;
-                case 1:
-                    return "Серия ";
-                default:
-                    return "Серии ";
-            }
+            return RssFactory.BuildFeed(content, ClassId);
         }
     }
 }

@@ -10,6 +10,8 @@ namespace LibriaDbSync
 {
     public static class RssOnline
     {
+        public const string ClassId = "эпизоды";
+
         [FunctionName("RssOnline")]
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req, ILogger log)
         {
@@ -37,7 +39,7 @@ namespace LibriaDbSync
                 }
             }
 
-            return RssFactory.BuildFeed(content, "эпизоды");
+            return RssFactory.BuildFeed(content, ClassId);
         }
     }
 }

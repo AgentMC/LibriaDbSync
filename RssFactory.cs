@@ -19,30 +19,34 @@ namespace LibriaDbSync
         public static IActionResult BuildFeed(List<RssEntry> entries, string titleSuffix)
         {
             var ch = new XElement("channel",
-            new XElement("title", $"Anilibria — так звучит аниме! [{titleSuffix}]"),
-            new XElement("link", "https://www.anilibria.tv"),
-            new XElement("description", "Неофициальная RSS-лента по сайту Anilibria.tv"),
-            new XElement("language", "ru-ru"),
-            new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
-            new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
-            new XElement("lastBuildDate", entries[0].Created.ToDateTime().ToString("R")),
-            new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
-            new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
-            new XElement("ttl", "15"),
-            new XElement("image",
-                new XElement("url", "https://static.anilibria.tv/img/footer.png"),
-                new XElement("title", "Anilibria — Спасибо, что выбираете нас!"),
-                new XElement("link", "https://www.anilibria.tv")));
+                        new XElement("title", $"Anilibria — так звучит аниме! [{titleSuffix}]"),
+                        new XElement("link", "https://www.anilibria.tv"),
+                        new XElement("description", "Неофициальная RSS-лента по сайту Anilibria.tv"),
+                        new XElement("language", "ru-ru"),
+                        new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
+                        new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
+                        new XElement("lastBuildDate", entries[0].Created.ToDateTime().ToString("R")),
+                        new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
+                        new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
+                        new XElement("ttl", "15"),
+                        new XElement("image",
+                            new XElement("url", "https://static.anilibria.tv/img/footer.png"),
+                            new XElement("title", "Anilibria — Спасибо, что выбираете нас!"),
+                            new XElement("link", "https://www.anilibria.tv")));
 
             foreach (var episode in entries)
             {
+                if(episode.Title == null && titleSuffix == RssTorrent.ClassId)
+                {
+                    episode.Title = BuildTorrentTitle(episode.Release.torrents.First(t => t.id == episode.Uid));
+                }
                 ch.Add(new XElement("item",
-                        new XElement("title", Processors["{maintitle}"](episode)),
-                        new XElement("link", Processors["{releaselink}"](episode)),
-                        new XElement("guid", new XAttribute("isPermaLink", "false"), GetGlobalizedUid(episode, titleSuffix).ToString()),
-                        new XElement("pubDate", episode.Created.ToDateTime().ToString("R")),
-                        new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), $"GetLibriaRss - {titleSuffix}"),
-                        new XElement("description", BuildDescription(episode))));
+                            new XElement("title", Processors["{maintitle}"](episode)),
+                            new XElement("link", Processors["{releaselink}"](episode)),
+                            new XElement("guid", new XAttribute("isPermaLink", "false"), GetGlobalizedUid(episode, titleSuffix).ToString()),
+                            new XElement("pubDate", episode.Created.ToDateTime().ToString("R")),
+                            new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), $"GetLibriaRss - {titleSuffix}"),
+                            new XElement("description", BuildDescription(episode))));
             }
 
             return new OkObjectResult(new XDocument(new XElement("rss", new XAttribute("version", "2.0"), ch)).ToString())
@@ -100,7 +104,7 @@ namespace LibriaDbSync
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">Серии {t.series} [{t.quality}]</a></li>")) }
+            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{BuildTorrentTitle(t)}</a></li>")) }
         };
 
         private static string BuildDescription(RssEntry episode)
@@ -155,6 +159,34 @@ namespace LibriaDbSync
                 }
             }
             return res.ToString();
+        }
+
+        private static string BuildTorrentTitle(Torrent torrent) => $"{GetTorrentTitlePrefix(torrent.series)}{torrent.series} [{torrent.quality}]";
+
+        private static string GetTorrentTitlePrefix(string episodeSetDescription)
+        {
+            int digitGroups = 0;
+            bool isDigit = false;
+            foreach (var c in episodeSetDescription)
+            {
+                if (char.IsDigit(c) != isDigit)
+                {
+                    isDigit = !isDigit;
+                    if (isDigit)
+                    {
+                        digitGroups++;
+                    }
+                }
+            }
+            switch (digitGroups)
+            {
+                case 0:
+                    return string.Empty;
+                case 1:
+                    return "Серия ";
+                default:
+                    return "Серии ";
+            }
         }
     }
 
