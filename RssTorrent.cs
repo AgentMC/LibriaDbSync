@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+п»їusing Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -38,7 +38,7 @@ namespace LibriaDbSync
             }
             content.ForEach(r => { var tor = r.Release.torrents.Single(t => t.id == r.Uid); r.Title = $"{GetPrefix(tor.series)}{tor.series} [{tor.quality}]"; });
 
-            return RssFactory.BuildFeed(content, "торренты");
+            return RssFactory.BuildFeed(content, "С‚РѕСЂСЂРµРЅС‚С‹");
         }
 
         private static string GetPrefix(string episodeSetDescription)
@@ -61,9 +61,9 @@ namespace LibriaDbSync
                 case 0:
                     return string.Empty;
                 case 1:
-                    return "Серия ";
+                    return "РЎРµСЂРёСЏ ";
                 default:
-                    return "Серии ";
+                    return "РЎРµСЂРёРё ";
             }
         }
     }
