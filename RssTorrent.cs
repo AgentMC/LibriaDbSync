@@ -38,7 +38,7 @@ namespace LibriaDbSync
                 }
             }
 
-            return RssFactory.BuildFeed(content, ClassId);
+            return RssFactory.BuildFeed(content, ClassId, RssFactory.FactorySettings.BuildTitleFromTorrentsByUid);
         }
     }
 }

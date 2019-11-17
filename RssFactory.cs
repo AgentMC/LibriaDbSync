@@ -16,7 +16,7 @@ namespace LibriaDbSync
     {
         static readonly Guid BaseGuid = Guid.Parse("{76A03AEC-B4AE-4D1D-B5C4-48A08058EF1F}");
 
-        public static IActionResult BuildFeed(List<RssEntry> entries, string titleSuffix)
+        public static IActionResult BuildFeed(List<RssEntry> entries, string titleSuffix, FactorySettings settings)
         {
             var ch = new XElement("channel",
                         new XElement("title", $"Anilibria — так звучит аниме! [{titleSuffix}]"),
@@ -36,7 +36,7 @@ namespace LibriaDbSync
 
             foreach (var episode in entries)
             {
-                if(episode.Title == null && titleSuffix == RssTorrent.ClassId)
+                if ((settings & FactorySettings.BuildTitleFromTorrentsByUid) > 0)
                 {
                     episode.Title = BuildTorrentTitle(episode.Release.torrents.First(t => t.id == episode.Uid));
                 }
@@ -187,6 +187,12 @@ namespace LibriaDbSync
                 default:
                     return "Серии ";
             }
+        }
+
+        [Flags]
+        public enum FactorySettings
+        {
+            None, BuildTitleFromTorrentsByUid
         }
     }
 
