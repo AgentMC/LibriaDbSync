@@ -16,10 +16,6 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[Releases]    Script Date: 02.11.2019 19:06:37 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE TABLE [dbo].[Releases](
 	[Id] [int] NOT NULL,
 	[Titles] [nvarchar](512) NULL,
@@ -66,12 +62,6 @@ CREATE NONCLUSTERED INDEX [IX_Episodes_Created] ON [dbo].[Episodes]
 )WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[Torrents]    Script Date: 04.11.2019 21:41:05 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE TABLE [dbo].[Torrents](
 	[Id] [int] NOT NULL,
 	[ReleaseId] [int] NOT NULL,
