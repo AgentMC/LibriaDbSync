@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -16,23 +15,6 @@ namespace LibriaDbSync
             await connection.OpenAsync();
             log.LogInformation($"Connection to DB opened successfully.");
             return connection;
-        }
-
-        internal static Release ReadRelease(SqlDataReader rdr)
-        {
-            return new Release
-            {
-                names = JsonConvert.DeserializeObject<List<string>>((string)rdr["Titles"]),
-                code = (string)rdr["Code"],
-                description = (string)rdr["Description"],
-                poster = (string)rdr["Poster"],
-                StatusCode = (byte)rdr["StatusCode"],
-                genres = JsonConvert.DeserializeObject<List<string>>((string)rdr["Genres"]),
-                voices = JsonConvert.DeserializeObject<List<string>>((string)rdr["Voicers"]),
-                Year = (short)rdr["Year"],
-                season = (string)rdr["Season"],
-                torrents = JsonConvert.DeserializeObject<List<Torrent>>((string)rdr["Torrents"]),
-            };
         }
 
         internal static DateTime ToDateTime(this long seconds) => new DateTime(1970, 1, 1).AddSeconds(seconds);

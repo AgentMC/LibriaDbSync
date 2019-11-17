@@ -16,7 +16,7 @@ namespace LibriaDbSync
     {
         static readonly Guid BaseGuid = Guid.Parse("{76A03AEC-B4AE-4D1D-B5C4-48A08058EF1F}");
 
-        public static IActionResult BuildFeed(List<RssEntry> entries, string titleSuffix, FactorySettings settings)
+        public static IActionResult BuildFeed(List<RssEntry> entries, string titleSuffix)
         {
             var ch = new XElement("channel",
                         new XElement("title", $"Anilibria — так звучит аниме! [{titleSuffix}]"),
@@ -36,10 +36,6 @@ namespace LibriaDbSync
 
             foreach (var episode in entries)
             {
-                if ((settings & FactorySettings.BuildTitleFromTorrentsByUid) > 0)
-                {
-                    episode.Title = BuildTorrentTitle(episode.Release.torrents.First(t => t.id == episode.Uid));
-                }
                 ch.Add(new XElement("item",
                             new XElement("title", Processors["{maintitle}"](episode)),
                             new XElement("link", Processors["{releaselink}"](episode)),
@@ -104,7 +100,7 @@ namespace LibriaDbSync
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{BuildTorrentTitle(t)}</a></li>")) }
+            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) }
         };
 
         private static string BuildDescription(RssEntry episode)
@@ -160,8 +156,11 @@ namespace LibriaDbSync
             }
             return res.ToString();
         }
+    }
 
-        private static string BuildTorrentTitle(Torrent torrent) => $"{GetTorrentTitlePrefix(torrent.series)}{torrent.series} [{torrent.quality}]";
+    public static class FactoryShared
+    {
+        public static string BuildTorrentTitle(Torrent torrent) => $"{GetTorrentTitlePrefix(torrent.series)}{torrent.series} [{torrent.quality}]";
 
         private static string GetTorrentTitlePrefix(string episodeSetDescription)
         {
@@ -187,12 +186,6 @@ namespace LibriaDbSync
                 default:
                     return "Серии ";
             }
-        }
-
-        [Flags]
-        public enum FactorySettings
-        {
-            None, BuildTitleFromTorrentsByUid
         }
     }
 
