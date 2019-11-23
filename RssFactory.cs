@@ -25,7 +25,7 @@ namespace LibriaDbSync
                         new XElement("language", "ru-ru"),
                         new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
                         new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
-                        new XElement("lastBuildDate", entries[0].Created.ToDateTime().ToString("R")),
+                        new XElement("lastBuildDate", entries[0].Created.ToRssDateTimeString()),
                         new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
                         new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
                         new XElement("ttl", "15"),
@@ -40,7 +40,7 @@ namespace LibriaDbSync
                             new XElement("title", Processors["{maintitle}"](episode)),
                             new XElement("link", Processors["{releaselink}"](episode)),
                             new XElement("guid", new XAttribute("isPermaLink", "false"), GetGlobalizedUid(episode, titleSuffix).ToString()),
-                            new XElement("pubDate", episode.Created.ToDateTime().ToString("R")),
+                            new XElement("pubDate", episode.Created.ToRssDateTimeString()),
                             new XElement("source", new XAttribute("url", "https://getlibriarss.azurewebsites.net/api/RssOnline"), $"GetLibriaRss - {titleSuffix}"),
                             new XElement("description", BuildDescription(episode))));
             }
@@ -96,7 +96,7 @@ namespace LibriaDbSync
             {"{season}",        e => $"{e.Release.season} {e.Release.year}" },
             {"{state}",         e => e.Release.StatusCode == 1 ? "в работе" : "завершён" },
             {"{genres}",        e => string.Join(", ", e.Release.genres) },
-            {"{voicers}",       e => string.Join(", ", e.Release.voices.Select(DeHtmlize)) },
+            //{"{voicers}",       e => string.Join(", ", e.Release.voices.Select(DeHtmlize)) },
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{poster}",        e => e.Release.poster },
@@ -191,16 +191,18 @@ namespace LibriaDbSync
 
     class RssMediaFormatter : TextOutputFormatter
     {
+        private const string MediaType = "application/rss+xml";
+
         public RssMediaFormatter()
         {
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/rss+xml"));
+            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(MediaType));
             SupportedEncodings.Add(Encoding.UTF8);
             SupportedEncodings.Add(Encoding.Unicode);
         }
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
-            context.ContentType = "application/rss+xml";
+            context.ContentType = MediaType;
             await context.HttpContext.Response.WriteAsync(context.Object.ToString());
         }
     }

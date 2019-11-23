@@ -19,6 +19,8 @@ namespace LibriaDbSync
 
         internal static DateTime ToDateTime(this long seconds) => new DateTime(1970, 1, 1).AddSeconds(seconds);
 
+        internal static string ToRssDateTimeString(this long seconds) => ToDateTime(seconds).ToString("R");
+
         internal static long ToUnixTimeStamp(this DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
     }
     public class BlockedInfo
