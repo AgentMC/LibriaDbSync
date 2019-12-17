@@ -74,6 +74,10 @@ namespace LibriaDbSync
                         {
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
                         }
+                        foreach (var episodeId in exisitng.Where(e => !release.playlist.Any(r => r.id == e)))
+                        {
+                            DeleteEpisode(conn, episodeId, release.id, log);
+                        }
                     }
                 }
             }
@@ -172,7 +176,7 @@ namespace LibriaDbSync
             }
 
             lastEpisodeTimestamp = CheckTimeStamp(lastEpisodeTimestamp, 36, "No usable timestamp for new episodes", log);
-            
+
             SynchronizeTorrentIndex(conn, release, existingTorrentIds ?? GetTorrentIds(conn, release.id), log);
 
             log.LogInformation($"++Update complete. {res.Count} episodes found.");
@@ -193,7 +197,7 @@ namespace LibriaDbSync
         private static void SynchronizeTorrentIndex(SqlConnection conn, Release release, List<int> existingIds, ILogger log)
         {
             var outdatedIds = existingIds.Where(id => !release.torrents.Select(t => t.id).Contains(id)).ToList();
-            if(outdatedIds.Count > 0)
+            if (outdatedIds.Count > 0)
             {
                 var tids = string.Join(",", outdatedIds.Select(i => $"'{i}'"));
                 log.LogInformation($"++-Deleting torrent IDs {tids}.");
@@ -218,18 +222,36 @@ namespace LibriaDbSync
             }
         }
 
+        private static int MakeEpisodeDbId(int episodeId, int releaseId)
+        {
+            return releaseId + (episodeId << 16);
+        }
+
         private static void CreateEpisode(SqlConnection conn, Episode episode, int releaseId, long createdStamp, ILogger log)
         {
             log.LogInformation($"+++Creating an episode {episode.id}.");
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "Insert into Episodes (Id, ReleaseId, Title, Links, Created) Values (@id, @release, @title, @links, @created)";
-                cmd.Parameters.AddWithValue("@id", releaseId + (episode.id << 16));
+                cmd.Parameters.AddWithValue("@id", MakeEpisodeDbId(episode.id, releaseId));
                 cmd.Parameters.AddWithValue("@release", releaseId);
                 cmd.Parameters.AddWithValue("@title", episode.title);
                 cmd.Parameters.AddWithValue("@links", JsonConvert.SerializeObject(episode));
                 cmd.Parameters.AddWithValue("@created", createdStamp);
                 cmd.ExecuteNonQuery();
+            }
+        }
+
+        private static void DeleteEpisode(SqlConnection conn, int episodeId, int releaseId, ILogger log)
+        {
+            var epDbId = MakeEpisodeDbId(episodeId, releaseId);
+            log.LogInformation($"++-Deleting an obsolete episode {episodeId} (DB id {epDbId}).");
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "DELETE FROM Episodes WHERE Id=@id";
+                cmd.Parameters.AddWithValue("@id", epDbId);
+                var rows = cmd.ExecuteNonQuery();
+                log.LogInformation($"++- ==> {(rows == 1 ? "OK": "FAILURE")}.");
             }
         }
     }
