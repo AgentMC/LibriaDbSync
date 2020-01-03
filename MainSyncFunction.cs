@@ -36,8 +36,20 @@ namespace LibriaDbSync
             //finale
             log.LogInformation($"Text content received, length {jText.Length}.");
             var model = JsonConvert.DeserializeObject<LibriaModel>(jText);
-            SyncDb(model, log);
-            log.LogInformation($"Synchronization complete.");
+            if(model?.data?.items == null)
+            {
+                log.LogError($"Bad response. The response text is {jText}.");
+                throw new Exception("Unable to sync the DB. Response received contains invalid data.");
+            }
+            if (model.data.items.Count == 0)
+            {
+                log.LogWarning($"No releases returned. The response text is {jText}.");
+            }
+            else
+            {
+                SyncDb(model, log);
+            }
+            log.LogInformation("Synchronization complete.");
         }
 
         private static void SyncDb(LibriaModel model, ILogger log)
