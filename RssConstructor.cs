@@ -18,7 +18,7 @@ namespace LibriaDbSync
 
         protected virtual void PostProcess(RssEntry entry) { }
 
-        protected const string SqlMandatoryFields = "Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents";
+        protected const string SqlMandatoryFields = "Releases.Id as Rid, Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents";
 
         public async Task<IActionResult> Run(ILogger log)
         {
@@ -49,6 +49,7 @@ namespace LibriaDbSync
         {
             return new Release
             {
+                id = (int)rdr["Rid"],
                 names = JsonConvert.DeserializeObject<List<string>>((string)rdr["Titles"]),
                 code = (string)rdr["Code"],
                 description = (string)rdr["Description"],

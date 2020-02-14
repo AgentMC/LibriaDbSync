@@ -77,7 +77,7 @@ namespace LibriaDbSync
             unchecked
             {
                 var binmask = 0b10101010_01010101_10101010_01010101; //unnatural base
-                binmask ^= (byte)source.Length * (uint)0x01010101;   //clobe 1 byte to 4 of int and xor to base
+                binmask ^= (byte)source.Length * (uint)0x01010101;   //clone 1 byte to 4 of int and xor to base
                 for (int i = 0; i < source.Length; i++)
                 {
                     uint character = (uint)(source[i] << i); //char code and position
@@ -99,6 +99,7 @@ namespace LibriaDbSync
             //{"{voicers}",       e => string.Join(", ", e.Release.voices.Select(DeHtmlize)) },
             {"{description}",   e => e.Release.description},
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
+            {"{pikreleaselink}",e => $"http://animepik.org/anime/{e.Release.id}" },
             {"{poster}",        e => e.Release.poster },
             {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) }
         };
