@@ -30,6 +30,7 @@ CREATE TABLE [dbo].[Releases](
 	[Torrents] [nvarchar](max) NULL,
 	[Rating] [int] NULL,
 	[Code] [nvarchar](128) NULL,
+	[Baka] BIT NULL , 
 PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
