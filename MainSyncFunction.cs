@@ -162,7 +162,8 @@ namespace LibriaDbSync
                                         Description = @description,
                                         Torrents = @torrents,
                                         Rating = @rating,
-                                        Code = @code
+                                        Code = @code,
+                                        Baka = @bakanim
                                     WHERE Id = @id
                                     SELECT Id FROM Episodes WHERE ReleaseId = @id";
                 cmd.Parameters.AddWithValue("@id", release.id);
@@ -178,6 +179,7 @@ namespace LibriaDbSync
                 cmd.Parameters.AddWithValue("@torrents", JsonConvert.SerializeObject(release.torrents));
                 cmd.Parameters.AddWithValue("@rating", release.favorite.rating);
                 cmd.Parameters.AddWithValue("@code", release.code);
+                cmd.Parameters.AddWithValue("@bakanim", release.blockedInfo?.bakanim ?? false);
                 using (var rdr = cmd.ExecuteReader())
                 {
                     while (rdr.Read())
