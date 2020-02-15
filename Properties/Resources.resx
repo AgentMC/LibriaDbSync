@@ -148,7 +148,7 @@
     &lt;hr&gt;
     &lt;p class="description"&gt;{description}&lt;/p&gt;
     &lt;hr&gt;
-    &lt;p class="watch"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt; · &lt;a href="{pikreleaselink}"&gt;Animepik.org&lt;/a&gt;. Скачать MP4 можно через плеер.&lt;/p&gt;
+    &lt;p class="watch"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt; · &lt;a href="{pikreleaselink}"&gt;Animepik.org&lt;/a&gt;.&lt;/p&gt;
     &lt;p class="watch"&gt;&lt;span class="watchname"&gt;Скачать торрент:&lt;/span&gt; &lt;ul&gt;{torrentlinks}&lt;/ul&gt;&lt;/p&gt;</value>
   </data>
 </root>
