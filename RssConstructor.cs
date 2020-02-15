@@ -18,7 +18,7 @@ namespace LibriaDbSync
 
         protected virtual void PostProcess(RssEntry entry) { }
 
-        protected const string SqlMandatoryFields = "Releases.Id as Rid, Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents";
+        protected const string SqlMandatoryFields = "Releases.Id as Rid, Titles, Code, Description, Poster, StatusCode, Genres, Voicers, Year, Season, Torrents, Baka";
 
         public async Task<IActionResult> Run(ILogger log)
         {
@@ -60,6 +60,7 @@ namespace LibriaDbSync
                 Year = (short)rdr["Year"],
                 season = (string)rdr["Season"],
                 torrents = JsonConvert.DeserializeObject<List<Torrent>>((string)rdr["Torrents"]),
+                blockedInfo = new BlockedInfo { bakanim = rdr["Baka"] as bool? ?? false }
             };
         }
     }

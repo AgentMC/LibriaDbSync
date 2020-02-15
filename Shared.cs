@@ -27,6 +27,7 @@ namespace LibriaDbSync
     {
         public bool blocked { get; set; }
         public object reason { get; set; }
+        public bool bakanim { get; set; }
     }
 
     public class Episode

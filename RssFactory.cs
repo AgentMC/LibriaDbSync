@@ -101,7 +101,9 @@ namespace LibriaDbSync
             {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
             {"{pikreleaselink}",e => $"http://animepik.org/anime/{e.Release.id}" },
             {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) }
+            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) },
+            {"{displibria}",    e => Display(!e.Release.blockedInfo.bakanim) },
+            {"{dispbaka}",      e => Display(e.Release.blockedInfo.bakanim) }
         };
 
         private static string BuildDescription(RssEntry episode)
@@ -157,6 +159,8 @@ namespace LibriaDbSync
             }
             return res.ToString();
         }
+
+        private static string Display(bool show) => show ? "block" : "none";
     }
 
     public static class FactoryShared

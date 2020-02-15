@@ -62,24 +62,34 @@ namespace LibriaDbSync.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to     &lt;style&gt;
-        ///        body {
-        ///            font-family: &apos;Segoe UI&apos;, Calibri, &apos;Trebuchet MS&apos;, Verdana, Tahoma, Arial, sans-serif;
-        ///        }
-        ///        .poster {
-        ///            float: right;
-        ///            width: 350px;
-        ///            height: 500px;
-        ///            margin-left: 8px;
-        ///        }
-        ///        .metaname {
-        ///            font-weight: bold;
-        ///        }
-        ///        .watchname {
-        ///            font-weight: bold;
-        ///        }
+        ///    body {
+        ///        font-family: &apos;Segoe UI&apos;, Calibri, &apos;Trebuchet MS&apos;, Verdana, Tahoma, Arial, sans-serif;
+        ///    }
+        ///
+        ///    .poster {
+        ///        float: right;
+        ///        width: 350px;
+        ///        height: 500px;
+        ///        margin-left: 8px;
+        ///    }
+        ///
+        ///    .metaname {
+        ///        font-weight: bold;
+        ///    }
+        ///
+        ///    .watchname {
+        ///        font-weight: bold;
+        ///    }
+        ///
+        ///    .watch.bakanim {
+        ///        display: {dispbaka};
+        ///    }
+        ///
+        ///    .watch.libria {
+        ///        display: {displibria};
+        ///    }
         ///    &lt;/style&gt;
-        ///    &lt;img class=&quot;poster&quot; src=&quot;https://static.anilibria.tv{poster}&quot; /&gt;
-        ///    &lt;H1&gt;{releaset [rest of string was truncated]&quot;;.
+        ///    &lt;img class=&quot;po [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ItemTemplate {
             get {
