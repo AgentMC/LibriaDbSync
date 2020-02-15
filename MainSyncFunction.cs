@@ -60,9 +60,9 @@ namespace LibriaDbSync
                 {
                     log.LogInformation($"+Processing release {release.id}, '{(release.names != null && release.names.Count > 0 ? release.names[0] : "Undefined")}', {release.playlist.Count} live episodes.");
                     var maxEpisodeUpdate = Math.Max(release.GetLastTorrentUpdateEpochSeconds(), release.LastModified);
-                    var lastUpdated = GetLastUpdated(conn, release.id);
+                    var releaseMeta = GetMetadata(conn, release.id);
                     List<int> torrentIds = null;
-                    if (lastUpdated == null)
+                    if (releaseMeta == null)
                     {
                         log.LogInformation("++Proceeding. Reson: new.");
                         CreateRelease(conn, release.id, log);
@@ -72,15 +72,18 @@ namespace LibriaDbSync
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
                         }
                     }
-                    else if (lastUpdated.Value != release.LastModified
+                    else if (releaseMeta.Value.Item1 != release.LastModified
+                            || releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false)
                             || GetReleasesCount(conn, release.id) != release.playlist.Count
                             || !(torrentIds = GetTorrentIds(conn, release.id)).SequenceEqual(release.torrents.Select(t => t.id).OrderBy(i => i)))
                     {
-                        log.LogInformation($@"++Proceeding. Reson: {(lastUpdated.Value != release.LastModified
+                        log.LogInformation($@"++Proceeding. Reson: {(releaseMeta.Value.Item1 != release.LastModified
                                                                         ? "release updated"
-                                                                        : (torrentIds == null
-                                                                            ? "episodes count changed"
-                                                                            : "torrents updated"))}.");
+                                                                        : (torrentIds != null
+                                                                            ? "torrents updated"
+                                                                            : (releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false)
+                                                                                ? "baka flag updated"
+                                                                                : "episodes count changed")))}.");
                         var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
                         foreach (var episode in release.playlist.Where(e => !exisitng.Contains(e.id)))
                         {
@@ -95,14 +98,21 @@ namespace LibriaDbSync
             }
         }
 
-        private static long? GetLastUpdated(SqlConnection conn, int releaseId)
+        private static (long,bool)? GetMetadata(SqlConnection conn, int releaseId)
         {
             using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = "Select LastModified from Releases Where Id=@id";
+                cmd.CommandText = "Select LastModified, Baka from Releases Where Id=@id";
                 cmd.Parameters.AddWithValue("@id", releaseId);
-                return (long?)cmd.ExecuteScalar();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    if (rdr.Read())
+                    {
+                        return ((long)rdr["LastModified"], rdr["Baka"] as bool? ?? false);
+                    }
+                }
             }
+            return null;
         }
 
         private static int GetReleasesCount(SqlConnection conn, int releaseId)
