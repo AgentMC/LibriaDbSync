@@ -1,8 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace LibriaDbSync
@@ -22,6 +25,14 @@ namespace LibriaDbSync
         internal static string ToRssDateTimeString(this long seconds) => ToDateTime(seconds).ToString("R");
 
         internal static long ToUnixTimeStamp(this DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
+
+        internal static string LibApi(NameValueCollection parameters)
+        {
+            //const string endpoint = "https://anilibriasmartservice.azurewebsites.net/public/api/index.php";
+            const string endpoint = "https://www.anilibria.tv/public/api/index.php";
+            var bytes = new WebClient().UploadValues(endpoint, parameters);
+            return Encoding.UTF8.GetString(bytes);
+        }
     }
     public class BlockedInfo
     {
@@ -102,18 +113,23 @@ namespace LibriaDbSync
         public int allItems { get; set; }
     }
 
-    public class Data
+    public class IndexData
     {
         public List<Release> items { get; set; }
         public Pagination pagination { get; set; }
     }
 
-    public class LibriaModel
+    public class LibriaIndexModel : LibriaModelBase<IndexData> { }
+
+    public class LibriaReleaseModel : LibriaModelBase<Release> { }
+
+    public class LibriaModelBase<T>
     {
         public bool status { get; set; }
-        public Data data { get; set; }
+        public T data { get; set; }
         public object error { get; set; }
     }
+
 
     class RssEntry
     {

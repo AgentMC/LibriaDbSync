@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ namespace LibriaDbSync
 {
     public static class MainSyncFunction
     {
-        [FunctionName("MainSyncFunction")]
+        //[FunctionName("MainSyncFunction")]
         public static void Run([TimerTrigger("0 */15 * * * *")]TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
@@ -21,21 +21,16 @@ namespace LibriaDbSync
             //var jText = File.ReadAllText(FileName, Encoding.Unicode);
 
             //read from server
-            //const string endpoint = "https://anilibriasmartservice.azurewebsites.net/public/api/index.php";
-            const string endpoint = "https://www.anilibria.tv/public/api/index.php";
-            var col = new System.Collections.Specialized.NameValueCollection
+            var col = new NameValueCollection
             {
                 { "query", "list" },
                 { "page", "1" },
                 { "perPage", "50" }
             };
-            var wc = new System.Net.WebClient();
-            var bytes = wc.UploadValues(endpoint, col);
-            var jText = Encoding.UTF8.GetString(bytes);
-
+            var jText = Shared.LibApi(col);
             //finale
             log.LogInformation($"Text content received, length {jText.Length}.");
-            var model = JsonConvert.DeserializeObject<LibriaModel>(jText);
+            var model = JsonConvert.DeserializeObject<LibriaIndexModel>(jText);
             if (model?.data?.items == null)
             {
                 log.LogError($"Bad response. The response text is {jText}.");
@@ -52,7 +47,7 @@ namespace LibriaDbSync
             log.LogInformation("Synchronization complete.");
         }
 
-        private static void SyncDb(LibriaModel model, ILogger log)
+        private static void SyncDb(LibriaIndexModel model, ILogger log)
         {
             using (var conn = Shared.OpenConnection(log).Result)
             {
@@ -160,7 +155,7 @@ namespace LibriaDbSync
             var res = new List<PackedId>();
             using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = @"UPDATE Releases 
+                cmd.CommandText = @"UPDATE Releases
                                     SET Titles = @titles,
                                         Poster = @poster,
                                         LastModified = @lastmodified,
