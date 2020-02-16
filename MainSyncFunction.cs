@@ -36,7 +36,7 @@ namespace LibriaDbSync
             //finale
             log.LogInformation($"Text content received, length {jText.Length}.");
             var model = JsonConvert.DeserializeObject<LibriaModel>(jText);
-            if(model?.data?.items == null)
+            if (model?.data?.items == null)
             {
                 log.LogError($"Bad response. The response text is {jText}.");
                 throw new Exception("Unable to sync the DB. Response received contains invalid data.");
@@ -85,20 +85,20 @@ namespace LibriaDbSync
                                                                                 ? "baka flag updated"
                                                                                 : "episodes count changed")))}.");
                         var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
-                        foreach (var episode in release.playlist.Where(e => !exisitng.Contains(e.id)))
+                        foreach (var episode in release.playlist.Where(pe => !exisitng.Any(ee => ee.EpisodeId == pe.id)))
                         {
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
                         }
-                        foreach (var episodeId in exisitng.Where(e => !release.playlist.Any(r => r.id == e)))
+                        foreach (var episodeId in exisitng.Where(ee => !release.playlist.Any(pe => pe.id == ee.EpisodeId)))
                         {
-                            DeleteEpisode(conn, episodeId, release.id, log);
+                            DeleteEpisode(conn, episodeId, log);
                         }
                     }
                 }
             }
         }
 
-        private static (long,bool)? GetMetadata(SqlConnection conn, int releaseId)
+        private static (long, bool)? GetMetadata(SqlConnection conn, int releaseId)
         {
             using (var cmd = conn.CreateCommand())
             {
@@ -154,10 +154,10 @@ namespace LibriaDbSync
             }
         }
 
-        private static List<int> UpdateRelease(SqlConnection conn, Release release, ILogger log, ref long lastEpisodeTimestamp, List<int> existingTorrentIds)
+        private static List<PackedId> UpdateRelease(SqlConnection conn, Release release, ILogger log, ref long lastEpisodeTimestamp, List<int> existingTorrentIds)
         {
             log.LogInformation("++Updating the release entry...");
-            var res = new List<int>();
+            var res = new List<PackedId>();
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = @"UPDATE Releases 
@@ -194,7 +194,7 @@ namespace LibriaDbSync
                 {
                     while (rdr.Read())
                     {
-                        res.Add(rdr.GetInt32(0) >> 16);
+                        res.Add(PackedId.Unpack(rdr.GetInt32(0)));
                     }
                 }
             }
@@ -246,18 +246,13 @@ namespace LibriaDbSync
             }
         }
 
-        private static int MakeEpisodeDbId(int episodeId, int releaseId)
-        {
-            return releaseId + (episodeId << 16);
-        }
-
         private static void CreateEpisode(SqlConnection conn, Episode episode, int releaseId, long createdStamp, ILogger log)
         {
             log.LogInformation($"+++Creating an episode {episode.id}.");
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "Insert into Episodes (Id, ReleaseId, Title, Links, Created) Values (@id, @release, @title, @links, @created)";
-                cmd.Parameters.AddWithValue("@id", MakeEpisodeDbId(episode.id, releaseId));
+                cmd.Parameters.AddWithValue("@id", new PackedId(releaseId: releaseId, episodeId: episode.id).Pack());
                 cmd.Parameters.AddWithValue("@release", releaseId);
                 cmd.Parameters.AddWithValue("@title", episode.title);
                 cmd.Parameters.AddWithValue("@links", JsonConvert.SerializeObject(episode));
@@ -266,16 +261,16 @@ namespace LibriaDbSync
             }
         }
 
-        private static void DeleteEpisode(SqlConnection conn, int episodeId, int releaseId, ILogger log)
+        private static void DeleteEpisode(SqlConnection conn, PackedId episode, ILogger log)
         {
-            var epDbId = MakeEpisodeDbId(episodeId, releaseId);
-            log.LogInformation($"++-Deleting an obsolete episode {episodeId} (DB id {epDbId}).");
+            var epDbId = episode.Pack();
+            log.LogInformation($"++-Deleting an obsolete episode {episode.EpisodeId} of release {episode.ReleaseId} (DB id {epDbId}).");
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "DELETE FROM Episodes WHERE Id=@id";
                 cmd.Parameters.AddWithValue("@id", epDbId);
                 var rows = cmd.ExecuteNonQuery();
-                log.LogInformation($"++- ==> {(rows == 1 ? "OK": "FAILURE")}.");
+                log.LogInformation($"++- ==> {(rows == 1 ? "OK" : "FAILURE")}.");
             }
         }
     }
