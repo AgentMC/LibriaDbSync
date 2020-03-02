@@ -104,7 +104,8 @@ namespace LibriaDbSync
             {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) },
             {"{displibria}",    e => Display(!e.Release.blockedInfo.bakanim) },
             {"{dispbaka}",      e => Display(e.Release.blockedInfo.bakanim) },
-            {"{streamproxylnk}",e => $"https://getlibriarss.azurewebsites.net/api/StreamProxy?release={e.Release.id}&episode={e.Uid}&hd=true" }
+            {"{streamproxylnk}",e => e.EnableEpisodeSpecificData ? $"https://getlibriarss.azurewebsites.net/api/StreamProxy?release={e.Release.id}&episode={PackedId.Unpack(e.Uid).EpisodeId}&hd=true" : string.Empty },
+            {"{dispepionly}",   e => Display(e.EnableEpisodeSpecificData, false)}
         };
 
         private static string BuildDescription(RssEntry episode)
@@ -161,7 +162,7 @@ namespace LibriaDbSync
             return res.ToString();
         }
 
-        private static string Display(bool show) => show ? "block" : "none";
+        private static string Display(bool show, bool block = true) => show ? ( block ? "block" : "inline") : "none";
     }
 
     public static class FactoryShared

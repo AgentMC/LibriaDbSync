@@ -145,6 +145,10 @@
     .watch.libria {
         display: {displibria};
     }
+
+    .watch .epionly {
+        display: {dispepionly};
+    }
     &lt;/style&gt;
     &lt;img class="poster" src="https://static.anilibria.tv{poster}" /&gt;
     &lt;H1&gt;{releasetitle}&lt;/H1&gt;
@@ -159,8 +163,8 @@
     &lt;hr&gt;
     &lt;p class="description"&gt;{description}&lt;/p&gt;
     &lt;hr&gt;
-    &lt;p class="watch libria"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt;&lt;/p&gt;
-    &lt;p class="watch bakanim"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{pikreleaselink}"&gt;Animepik.org&lt;/a&gt; ·  Страница релиза (просмотр недоступен): &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt; · Только просмотр (если остальное не работает): &lt;a href="{streamproxylnk}"&gt;видео-плеер&lt;/a&gt;&lt;/p&gt;
+    &lt;p class="watch libria"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt;&lt;span class="epionly"&gt; · Только просмотр (если остальное не работает): &lt;a href="{streamproxylnk}"&gt;видео-плеер&lt;/a&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;p class="watch bakanim"&gt;&lt;span class="watchname"&gt;Смотреть на сайте:&lt;/span&gt; &lt;a href="{pikreleaselink}"&gt;Animepik.org&lt;/a&gt; ·  Страница релиза (просмотр недоступен): &lt;a href="{releaselink}"&gt;Anilibria.tv&lt;/a&gt;&lt;span class="epionly"&gt; · Только просмотр (если остальное не работает): &lt;a href="{streamproxylnk}"&gt;видео-плеер&lt;/a&gt;&lt;/span&gt;&lt;/p&gt;
     &lt;p class="watch"&gt;&lt;span class="watchname"&gt;Скачать торрент:&lt;/span&gt; &lt;ul&gt;{torrentlinks}&lt;/ul&gt;&lt;/p&gt;</value>
   </data>
 </root>

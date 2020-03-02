@@ -140,5 +140,7 @@ namespace LibriaDbSync
         public Release Release { get; set; }
 
         public long Created { get; set; }
+
+        public bool EnableEpisodeSpecificData {get;set;}
     }
 }

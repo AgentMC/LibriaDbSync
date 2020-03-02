@@ -79,7 +79,8 @@ namespace LibriaDbSync
             {
                 Uid = (int)sqlReader["Uid"],
                 Title = (string)sqlReader["Title"],
-                Created = (long)sqlReader["Created"]
+                Created = (long)sqlReader["Created"],
+                EnableEpisodeSpecificData = true
             };
         }
     }

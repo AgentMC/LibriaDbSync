@@ -88,8 +88,9 @@ namespace LibriaDbSync.Properties {
         ///    .watch.libria {
         ///        display: {displibria};
         ///    }
-        ///    &lt;/style&gt;
-        ///    &lt;img class=&quot;po [rest of string was truncated]&quot;;.
+        ///
+        ///    .watch .epionly {
+        ///        [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ItemTemplate {
             get {
