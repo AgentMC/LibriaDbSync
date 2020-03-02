@@ -103,7 +103,8 @@ namespace LibriaDbSync
             {"{poster}",        e => e.Release.poster },
             {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) },
             {"{displibria}",    e => Display(!e.Release.blockedInfo.bakanim) },
-            {"{dispbaka}",      e => Display(e.Release.blockedInfo.bakanim) }
+            {"{dispbaka}",      e => Display(e.Release.blockedInfo.bakanim) },
+            {"{streamproxylnk}",e => $"https://getlibriarss.azurewebsites.net/api/StreamProxy?release={e.Release.id}&episode={e.Uid}&hd=true" }
         };
 
         private static string BuildDescription(RssEntry episode)

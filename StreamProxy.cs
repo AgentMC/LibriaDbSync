@@ -73,8 +73,20 @@ namespace LibriaDbSync
             }
             //http://localhost:7071/api/StreamProxy?release=8500&episode=18&hd=true
             
-            log.LogInformation($"StreamProxy: episode found, redirecting client. Function complete.");
-            return new RedirectResult(isHd ? episode.srcHd : episode.srcSd);
+            log.LogInformation($"StreamProxy: episode found, rendering the response. Function complete.");
+
+            return new ContentResult()
+            {
+                ContentType = "text/html",
+                Content = $@"
+<html>
+    <body bgcolor=""black"">
+        <video controls=""true"" width=""100% "" height=""100%"" preload=""metadata"">
+            <source src=""{(isHd ? episode.srcHd : episode.srcSd)}"" type=""video/mp4"">
+        </video>
+    </body>
+</html>"
+            };
         }
     }
 }
