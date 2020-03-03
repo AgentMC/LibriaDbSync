@@ -67,9 +67,7 @@ namespace LibriaDbSync.UnitTests
         public void PackV0Test(int packed, int episode, int release)
         {
             var packer = new PackedId(release, episode);
-            var boxed = (object)packer;
-            typeof(PackedId).GetField(nameof(packer.Version), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).SetValue(boxed, 0);
-            packer = (PackedId)boxed;
+            typeof(PackedId).GetField(nameof(packer.Version), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).SetValueDirect(__makeref(packer), 0);
             var actual = packer.Pack();
             Assert.AreEqual(packed, actual, "Wrongly packed");
         }
@@ -96,9 +94,7 @@ namespace LibriaDbSync.UnitTests
                 var p2 = new PackedId(p1.ReleaseId, p1.EpisodeId);
                 if(p1.Version == 0)
                 {
-                    var boxed = (object)p2;
-                    typeof(PackedId).GetField(nameof(p2.Version), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).SetValue(boxed, 0);
-                    p2 = (PackedId)boxed;
+                    typeof(PackedId).GetField(nameof(p2.Version), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).SetValueDirect(__makeref(p2), 0);
                 }
                 Assert.AreEqual(source, p1.Pack(), "Round-robin 1st iteration didn't work for " + source);
                 Assert.AreEqual(p1.Version, p2.Version, "Version wrong");
