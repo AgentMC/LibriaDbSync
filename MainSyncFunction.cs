@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -12,7 +13,8 @@ namespace LibriaDbSync
     public static class MainSyncFunction
     {
         [FunctionName("MainSyncFunction")]
-        public static void Run([TimerTrigger("0 */15 * * * *")]TimerInfo myTimer, ILogger log)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Azure API")]
+        public static async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
 
@@ -30,7 +32,7 @@ namespace LibriaDbSync
                 { "perPage", "50" }
             };
             var wc = new System.Net.WebClient();
-            var bytes = wc.UploadValues(endpoint, col);
+            var bytes = await wc.UploadValuesTaskAsync(endpoint, col);
             var jText = Encoding.UTF8.GetString(bytes);
 
             //finale
@@ -47,14 +49,14 @@ namespace LibriaDbSync
             }
             else
             {
-                SyncDb(model, log);
+                await SyncDb(model, log);
             }
             log.LogInformation("Synchronization complete.");
         }
 
-        private static void SyncDb(LibriaModel model, ILogger log)
+        private static async Task SyncDb(LibriaModel model, ILogger log)
         {
-            using (var conn = Shared.OpenConnection(log).Result)
+            using (var conn = await Shared.OpenConnection(log))
             {
                 foreach (var release in model.data.items)
                 {

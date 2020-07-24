@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.29411.138
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibriaDbSync", "LibriaDbSync.csproj", "{4878B28C-AB67-4BD6-9B6C-498D2CF8BCF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibriaDbSync.UnitTests", "UnitTests\LibriaDbSync.UnitTests\LibriaDbSync.UnitTests.csproj", "{8F65AE65-8C3B-47C5-AB20-55EE11DAB363}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibriaDbSync.UnitTests", "UnitTests\LibriaDbSync.UnitTests\LibriaDbSync.UnitTests.csproj", "{8F65AE65-8C3B-47C5-AB20-55EE11DAB363}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{99A02129-28DB-499C-96C3-8BEC1936F437}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
