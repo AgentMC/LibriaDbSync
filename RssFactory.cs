@@ -6,6 +6,7 @@ using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -26,7 +27,7 @@ namespace LibriaDbSync
                         new XElement("copyright", "Все права на контент в этом канале принадлежат сайту Anilibria.tv. Все права на код синхронизатора базы и генератора ленты принадлежат AgentMC."),
                         new XElement("webMaster", "agentmc@mail.ru (AgentMC)"),
                         new XElement("lastBuildDate", entries[0].Created.ToRssDateTimeString()),
-                        new XElement("generator", "Azure Functions + Azure Sql + a bunch of C# :)"),
+                        new XElement("generator", $"Azure Functions + Azure Sql + a bunch of C# :) version [{Assembly.GetExecutingAssembly().GetName().Version}]"),
                         new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
                         new XElement("ttl", "15"),
                         new XElement("image",

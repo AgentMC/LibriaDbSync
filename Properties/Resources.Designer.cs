@@ -81,15 +81,15 @@ namespace LibriaDbSync.Properties {
         ///        font-weight: bold;
         ///    }
         ///
-        ///    .watch.bakanim {
+        ///    .watchbakanim {
         ///        display: {dispbaka};
         ///    }
         ///
-        ///    .watch.libria {
+        ///    .watchlibria {
         ///        display: {displibria};
         ///    }
         ///    &lt;/style&gt;
-        ///    &lt;img class=&quot;po [rest of string was truncated]&quot;;.
+        ///    &lt;img class=&quot;post [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ItemTemplate {
             get {
