@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using LibriaDbSync.LibApi.V1;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -18,47 +18,33 @@ namespace LibriaDbSync
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
 
-            //initial upload
-            //const string FileName = @"D:\hackd\Desk\libriabase.json";
-            //var jText = File.ReadAllText(FileName, Encoding.Unicode);
+            var extractor = Shared.GetExtractor();
+            log.LogInformation($"Extractor invoking: {extractor.GetType()}.");
 
-            //read from server
-            //const string endpoint = "https://anilibriasmartservice.azurewebsites.net/public/api/index.php";
-            const string endpoint = "https://www.anilibria.tv/public/api/index.php";
-            var col = new System.Collections.Specialized.NameValueCollection
-            {
-                { "query", "list" },
-                { "page", "1" },
-                { "perPage", "50" }
-            };
-            var wc = new System.Net.WebClient();
-            var bytes = await wc.UploadValuesTaskAsync(endpoint, col);
-            var jText = Encoding.UTF8.GetString(bytes);
+            var (model, responseText) = await extractor.Extract(50);
+            log.LogInformation($"Text content received, length {responseText.Length}.");
 
-            //finale
-            log.LogInformation($"Text content received, length {jText.Length}.");
-            var model = JsonConvert.DeserializeObject<LibriaModel>(jText);
             if (model?.data?.items == null)
             {
-                log.LogError($"Bad response. The response text is {jText}.");
+                log.LogError($"Bad response. The response text is {responseText}.");
                 throw new Exception("Unable to sync the DB. Response received contains invalid data.");
             }
             if (model.data.items.Count == 0)
             {
-                log.LogWarning($"No releases returned. The response text is {jText}.");
+                log.LogWarning($"No releases returned. The response text is {responseText}.");
             }
             else
             {
-                await SyncDb(model, log);
+                await SyncDb(model.data, log);
             }
             log.LogInformation("Synchronization complete.");
         }
 
-        private static async Task SyncDb(LibriaModel model, ILogger log)
+        private static async Task SyncDb(Data data, ILogger log)
         {
             using (var conn = await Shared.OpenConnection(log))
             {
-                foreach (var release in model.data.items)
+                foreach (var release in data.items)
                 {
                     log.LogInformation($"+Processing release {release.id}, '{(release.names != null && release.names.Count > 0 ? release.names[0] : "Undefined")}', {release.playlist.Count} live episodes.");
                     var maxEpisodeUpdate = Math.Max(release.GetLastTorrentUpdateEpochSeconds(), release.LastModified);
