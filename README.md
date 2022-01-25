@@ -1,7 +1,12 @@
 # LibriaDbSync
 Механизм синхронизации и генератор RSS для сайта Anilibria.tv (неофициальный)
 
-Synchronization engine and the RSS Generator to produce RSS feed over Anilibria.tv (unofficial)
+Synchronization engine and the RSS Generator to produce RSS feeds over Anilibria.tv (unofficial)
+
+# Оправдание / Justification
+Это приложение было создано задолго до того, как на Либрии появилась возможность читать RSS (API 2.0). На сегодняшний день оно просто немного расширяет функционал, позволяя получать обновления только по выбранным категориям событий.
+
+This app has been created long before the ability to read RSS appeared on Libria (API 2.0). As of today it simply provides greater flexibility, allowing to get the feed over particular event categories.
 
 # Использование / Usage
 Добавьте один из следующих фидов (ну или все) в вашу читалку RSS (Thunderbird например):
@@ -17,15 +22,14 @@ Add one of the following feeds (or all of them) to your RSS reader (e.g. Thunder
 
 Complies with RSS 2.0 specification. However, feed is not 100% compatible because of HTML content and some other details. Does not contain any other content than from Anilibria (i.e. no ads). Refresh frequency - 15 minutes.
 
-# Время добавления серии / Episode upload time
-К сожалению, API Анилибрии не возвращает время создания серии на сервере (в плеере), поэтому время добавления эпизода считается как время заливки самого свежего торрента — или время обновления релиза, в зависимости от того, что свежее. Также, если ни то, ни другое не находится в пределах 36 часов (серия появилась в плеере, а ни релиз не обновился, ни торрент не залили), то используется текущее время обнаружения нового эпизода. Поэтому время, которое отображает ваш RSS клиент не является моментом появления серии в плеере. Время появления торрента указано точно.
-
-Unfortunately, the Anilibria API does not return the episode creation timestamp, and the time the episode was added is calculated as the most recent torrent upload time — or the release update timestamp, if it's fresher. Also, if neither lies within 36 hours (an episode was added but neither release was updated nor new torrent uploaded), then the current timestamp is used. That's why the time your RSS client shows is not the moment the episode appeared in the player. The torrent timestamp is precise however.
+# TODO
+* Pass through the episode update time from API v2.
 
 # Architecture
  - Azure Sql DB
  - Azure function, timer triggered - synchronizer. Each 15 minutes gets last 50 updated releases from Anilibria API, and updates the information on them to the Sql DB.
      - Initial synchronization was performed using the Anilibria UWP application Azure API (it has a bug and always returns *entire* DB :)) to minimize the public site impact.
      - Unfortunately because of the bug, it is not possible to use it for the regular updates.
- - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 24 (two site pages) episodes recorded on the Sql DB.
- - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 24 (two site pages) torrents recorded on the Sql DB.
+     - Libria API v.2.x.x is used
+ - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 50 episodes recorded on the Sql DB.
+ - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 100 torrents (50 releases) recorded on the Sql DB.
