@@ -7,6 +7,7 @@ using LibriaDbSync.LibApi.V1;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using TorrentsData = System.Tuple<System.Collections.Generic.List<int>, System.Collections.Generic.List<long>>;
 
 namespace LibriaDbSync
 {
@@ -14,7 +15,7 @@ namespace LibriaDbSync
     {
         [FunctionName("MainSyncFunction")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Azure API")]
-        public static async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer, ILogger log)
+        public static async Task Run([TimerTrigger("0 */1 * * * *")] TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
 
@@ -49,12 +50,11 @@ namespace LibriaDbSync
                     log.LogInformation($"+Processing release {release.id}, '{(release.names != null && release.names.Count > 0 ? release.names[0] : "Undefined")}', {release.playlist.Count} live episodes.");
                     var maxEpisodeUpdate = Math.Max(release.GetLastTorrentUpdateEpochSeconds(), release.LastModified);
                     var releaseMeta = GetMetadata(conn, release.id);
-                    List<int> torrentIds = null;
                     if (releaseMeta == null)
                     {
                         log.LogInformation("++Proceeding. Reson: new.");
                         CreateRelease(conn, release.id, log);
-                        UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
+                        UpdateRelease(conn, release, log, ref maxEpisodeUpdate, null);
                         foreach (var episode in release.playlist)
                         {
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
@@ -62,25 +62,34 @@ namespace LibriaDbSync
                     }
                     else if (releaseMeta.Value.Item1 != release.LastModified)
                     {
-                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "release updated");
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, null, "release updated");
                     }
                     else if (releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false))
                     {
-                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "baka flag updated");
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, null, "baka flag updated");
                     }
                     else if (GetEpisodesCount(conn, release.id) != release.playlist.Count)
                     {
-                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "episodes count changed");
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, null, "episodes count changed");
                     }
-                    else if (!(torrentIds = GetTorrentIds(conn, release.id)).SequenceEqual(release.torrents.Select(t => t.id).OrderBy(i => i)))
+                    else
                     {
-                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "torrents set changed");
+                        var torrentIdsDb = GetTorrentIds(conn, release.id);
+                        var torrentsApi = release.torrents.OrderBy(t => t.id).ToList();
+                        if (!torrentIdsDb.Item1.SequenceEqual(torrentsApi.Select(t => t.id)))
+                        {
+                            ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIdsDb, "torrents set changed");
+                        }
+                        else if (!torrentIdsDb.Item2.SequenceEqual(torrentsApi.Select(t => t.ctime)))
+                        {
+                            ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIdsDb, "torrents updated in-place");
+                        }
                     }
                 }
             }
         }
 
-        private static void ProceedUpdate(SqlConnection conn, Release release, ILogger log, long maxEpisodeUpdate, List<int> torrentIds, string reason)
+        private static void ProceedUpdate(SqlConnection conn, Release release, ILogger log, long maxEpisodeUpdate, TorrentsData torrentIds, string reason)
         {
             log.LogInformation($@"++Proceeding. Reason: {reason}.");
             var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
@@ -121,22 +130,24 @@ namespace LibriaDbSync
             }
         }
 
-        private static List<int> GetTorrentIds(SqlConnection conn, int releaseId)
+        private static TorrentsData GetTorrentIds(SqlConnection conn, int releaseId)
         {
-            var res = new List<int>();
+            var ids = new List<int>();
+            var timestamps = new List<long>();
             using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = "Select Id from Torrents Where ReleaseId=@id order by Id";
+                cmd.CommandText = "Select Id, Created from Torrents Where ReleaseId=@id order by Id";
                 cmd.Parameters.AddWithValue("@id", releaseId);
                 using (var rdr = cmd.ExecuteReader())
                 {
                     while (rdr.Read())
                     {
-                        res.Add(rdr.GetInt32(0));
+                        ids.Add(rdr.GetInt32(0));
+                        timestamps.Add(rdr.GetInt64(1));
                     }
                 }
             }
-            return res;
+            return new TorrentsData(ids, timestamps);
         }
 
         private static void CreateRelease(SqlConnection conn, int id, ILogger log)
@@ -150,7 +161,7 @@ namespace LibriaDbSync
             }
         }
 
-        private static List<PackedId> UpdateRelease(SqlConnection conn, Release release, ILogger log, ref long lastEpisodeTimestamp, List<int> existingTorrentIds)
+        private static List<PackedId> UpdateRelease(SqlConnection conn, Release release, ILogger log, ref long lastEpisodeTimestamp, TorrentsData existingTorrentIds)
         {
             log.LogInformation("++Updating the release entry...");
             var res = new List<PackedId>();
@@ -207,16 +218,16 @@ namespace LibriaDbSync
         {
             if ((DateTime.Now - testTimeStamp.ToDateTime()).TotalHours > hoursThreshold)
             {
-                var properTimestamp = DateTime.Now.ToUnixTimeStamp();
-                log.LogInformation($"+++{thresholdMessage}. Using Now ({properTimestamp}).");
+                var properTimestamp = DateTime.Now.AddHours(-hoursThreshold).ToUnixTimeStamp();
+                log.LogInformation($"+++{thresholdMessage}. Using Now-{hoursThreshold} ({properTimestamp}).");
                 return properTimestamp;
             }
             return testTimeStamp;
         }
 
-        private static void SynchronizeTorrentIndex(SqlConnection conn, Release release, List<int> existingIds, ILogger log)
+        private static void SynchronizeTorrentIndex(SqlConnection conn, Release release, TorrentsData existingIds, ILogger log)
         {
-            var outdatedIds = existingIds.Where(id => !release.torrents.Select(t => t.id).Contains(id)).ToList();
+            var outdatedIds = existingIds.Item1.Where(id => !release.torrents.Select(t => t.id).Contains(id)).ToList();
             if (outdatedIds.Count > 0)
             {
                 var tids = string.Join(",", outdatedIds.Select(i => $"'{i}'"));
@@ -227,7 +238,7 @@ namespace LibriaDbSync
                     cmd.ExecuteNonQuery();
                 }
             }
-            foreach (var torrent in release.torrents.Where(t => !existingIds.Contains(t.id)))
+            foreach (var torrent in release.torrents.Where(t => !existingIds.Item1.Contains(t.id)))
             {
                 log.LogInformation($"+++Creating torrent {torrent.id}.");
                 var createdTimestamp = CheckTimeStamp(torrent.ctime, 36, "Torrent date out of range. Clamping", log);
@@ -238,6 +249,22 @@ namespace LibriaDbSync
                     cmd.Parameters.AddWithValue("@release", release.id);
                     cmd.Parameters.AddWithValue("@created", createdTimestamp);
                     cmd.ExecuteNonQuery();
+                }
+            }
+            for (int i = 0; i < existingIds.Item1.Count; i++)
+            {
+                var torrent = release.torrents.SingleOrDefault(t => t.id == existingIds.Item1[i]);
+                if(torrent != null && torrent.ctime != existingIds.Item2[i])
+                {
+                    log.LogInformation($"++*Modifying torrent's {torrent.id} timestamp .");
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = $"UPDATE Torrents SET Created = @created WHERE Id = @id and ReleaseId = @release";
+                        cmd.Parameters.AddWithValue("@id", torrent.id);
+                        cmd.Parameters.AddWithValue("@release", release.id);
+                        cmd.Parameters.AddWithValue("@created", torrent.ctime);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
         }
