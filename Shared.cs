@@ -1,5 +1,6 @@
 ﻿using LibriaDbSync.LibApi;
 using LibriaDbSync.LibApi.V1;
+using LibriaDbSync.LibApi.V2;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Data.SqlClient;
@@ -23,19 +24,12 @@ namespace LibriaDbSync
 
         internal static long ToUnixTimeStamp(this DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
 
-        private static readonly Func<ILibriaExtractor>[] Extractors = new Func<ILibriaExtractor>[] { () => new LibriaExtractorV1() };
+        private static readonly Func<ILibriaExtractor>[] Extractors = new Func<ILibriaExtractor>[] 
+        { 
+            () => new LibriaExtractorV1(), 
+            () => new LibriaExtractorV2() 
+        };
 
         internal static ILibriaExtractor GetExtractor() => Extractors[^1]();
-    }
-
-    class RssEntry
-    {
-        public int Uid { get; set; }
-
-        public string Title { get; set; }
-
-        public Release Release { get; set; }
-
-        public long Created { get; set; }
     }
 }

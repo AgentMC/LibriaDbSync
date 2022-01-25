@@ -60,29 +60,37 @@ namespace LibriaDbSync
                             CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
                         }
                     }
-                    else if (releaseMeta.Value.Item1 != release.LastModified
-                            || releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false)
-                            || GetReleasesCount(conn, release.id) != release.playlist.Count
-                            || !(torrentIds = GetTorrentIds(conn, release.id)).SequenceEqual(release.torrents.Select(t => t.id).OrderBy(i => i)))
+                    else if (releaseMeta.Value.Item1 != release.LastModified)
                     {
-                        log.LogInformation($@"++Proceeding. Reson: {(releaseMeta.Value.Item1 != release.LastModified
-                                                                        ? "release updated"
-                                                                        : (torrentIds != null
-                                                                            ? "torrents updated"
-                                                                            : (releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false)
-                                                                                ? "baka flag updated"
-                                                                                : "episodes count changed")))}.");
-                        var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
-                        foreach (var episode in release.playlist.Where(pe => !exisitng.Any(ee => ee.EpisodeId == pe.id)))
-                        {
-                            CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
-                        }
-                        foreach (var episodeId in exisitng.Where(ee => !release.playlist.Any(pe => pe.id == ee.EpisodeId)))
-                        {
-                            DeleteEpisode(conn, episodeId, log);
-                        }
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "release updated");
+                    }
+                    else if (releaseMeta.Value.Item2 != (release.blockedInfo?.bakanim ?? false))
+                    {
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "baka flag updated");
+                    }
+                    else if (GetEpisodesCount(conn, release.id) != release.playlist.Count)
+                    {
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "episodes count changed");
+                    }
+                    else if (!(torrentIds = GetTorrentIds(conn, release.id)).SequenceEqual(release.torrents.Select(t => t.id).OrderBy(i => i)))
+                    {
+                        ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIds, "torrents set changed");
                     }
                 }
+            }
+        }
+
+        private static void ProceedUpdate(SqlConnection conn, Release release, ILogger log, long maxEpisodeUpdate, List<int> torrentIds, string reason)
+        {
+            log.LogInformation($@"++Proceeding. Reason: {reason}.");
+            var exisitng = UpdateRelease(conn, release, log, ref maxEpisodeUpdate, torrentIds);
+            foreach (var episode in release.playlist.Where(pe => !exisitng.Any(ee => ee.EpisodeId == pe.id)))
+            {
+                CreateEpisode(conn, episode, release.id, maxEpisodeUpdate, log);
+            }
+            foreach (var episodeId in exisitng.Where(ee => !release.playlist.Any(pe => pe.id == ee.EpisodeId)))
+            {
+                DeleteEpisode(conn, episodeId, log);
             }
         }
 
@@ -103,7 +111,7 @@ namespace LibriaDbSync
             return null;
         }
 
-        private static int GetReleasesCount(SqlConnection conn, int releaseId)
+        private static int GetEpisodesCount(SqlConnection conn, int releaseId)
         {
             using (var cmd = conn.CreateCommand())
             {

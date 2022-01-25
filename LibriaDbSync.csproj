@@ -43,7 +43,4 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LibApi\V2\" />
-  </ItemGroup>
 </Project>
