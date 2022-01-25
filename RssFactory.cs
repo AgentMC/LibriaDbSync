@@ -57,18 +57,22 @@ namespace LibriaDbSync
 
         }
 
-        private static Guid GetGlobalizedUid(RssEntry episode, string suffix)
+        private static Guid GetGlobalizedUid(RssEntry entry, string suffix)
         {
             var tmp = BaseGuid.ToByteArray();
+            tmp[04] = (byte)((entry.Created & 0xFF000000) >> 24);
+            tmp[05] = (byte)((entry.Created & 0x00FF0000) >> 16);
+            tmp[06] = (byte)((entry.Created & 0x0000FF00) >> 8);
+            tmp[07] = (byte)( entry.Created & 0x000000FF);
             var hash = SimpleStaticStringHashCode(suffix);
             tmp[08] = (byte)((hash & 0xFF000000) >> 24);
             tmp[09] = (byte)((hash & 0x00FF0000) >> 16);
             tmp[10] = (byte)((hash & 0x0000FF00) >> 8);
             tmp[11] = (byte)( hash & 0x000000FF);
-            tmp[12] = (byte)((episode.Uid & 0xFF000000) >> 24);
-            tmp[13] = (byte)((episode.Uid & 0x00FF0000) >> 16);
-            tmp[14] = (byte)((episode.Uid & 0x0000FF00) >> 8);
-            tmp[15] = (byte)( episode.Uid & 0x000000FF);
+            tmp[12] = (byte)((entry.Uid & 0xFF000000) >> 24);
+            tmp[13] = (byte)((entry.Uid & 0x00FF0000) >> 16);
+            tmp[14] = (byte)((entry.Uid & 0x0000FF00) >> 8);
+            tmp[15] = (byte)( entry.Uid & 0x000000FF);
             return new Guid(tmp);
         }
 
