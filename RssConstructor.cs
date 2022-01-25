@@ -70,7 +70,7 @@ namespace LibriaDbSync
     {
         protected override string ClassId => "эпизоды";
 
-        protected override string SqlCommand => $@"SELECT TOP 24 Episodes.Id as Uid, Title, Created, {SqlMandatoryFields}
+        protected override string SqlCommand => $@"SELECT TOP {Shared.Threshold} Episodes.Id as Uid, Title, Created, {SqlMandatoryFields}
                                                    FROM Episodes JOIN Releases ON Releases.Id = ReleaseId
                                                    ORDER BY Created DESC";
 
@@ -89,7 +89,7 @@ namespace LibriaDbSync
     {
         protected override string ClassId => "торренты";
 
-        protected override string SqlCommand => $@"SELECT TOP 24 Torrents.Id as Uid, Created, {SqlMandatoryFields}
+        protected override string SqlCommand => $@"SELECT TOP {Shared.Threshold} Torrents.Id as Uid, Created, {SqlMandatoryFields}
                                                    FROM Torrents JOIN Releases ON Releases.Id = ReleaseId
                                                    ORDER BY Created DESC";
 

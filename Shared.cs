@@ -31,5 +31,7 @@ namespace LibriaDbSync
         };
 
         internal static ILibriaExtractor GetExtractor() => Extractors[^1]();
+
+        internal const int Threshold = 50;
     }
 }

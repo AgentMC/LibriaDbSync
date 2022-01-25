@@ -15,14 +15,14 @@ namespace LibriaDbSync
     {
         [FunctionName("MainSyncFunction")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Azure API")]
-        public static async Task Run([TimerTrigger("0 */1 * * * *")] TimerInfo myTimer, ILogger log)
+        public static async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
 
             var extractor = Shared.GetExtractor();
             log.LogInformation($"Extractor invoking: {extractor.GetType()}.");
 
-            var (model, responseText) = await extractor.Extract(50);
+            var (model, responseText) = await extractor.Extract(Shared.Threshold);
             log.LogInformation($"Text content received, length {responseText.Length}.");
 
             if (model?.data?.items == null)
