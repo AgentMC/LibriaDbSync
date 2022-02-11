@@ -97,7 +97,7 @@ namespace LibriaDbSync.LibApi.V2
     {
         public string @string { get; set; }
         public string type { get; set; }
-        public int? resolution { get; set; }
+        public string resolution { get; set; }
         public string encoder { get; set; }
         public bool? lq_audio { get; set; }
     }
