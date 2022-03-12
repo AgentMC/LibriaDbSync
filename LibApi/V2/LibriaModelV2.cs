@@ -11,8 +11,8 @@ namespace LibriaDbSync.LibApi.V2
         public string announce { get; set; }
         public Statusable status { get; set; }
         public Posters posters { get; set; }
-        public long updated { get; set; }
-        public long last_change { get; set; }
+        public long? updated { get; set; }
+        public long? last_change { get; set; }
         public ReleaseType type { get; set; }
         public List<string> genres { get; set; }
         public Team team { get; set; }

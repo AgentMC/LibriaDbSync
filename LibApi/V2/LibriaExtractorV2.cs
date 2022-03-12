@@ -1,5 +1,6 @@
 ﻿using LibriaDbSync.LibApi.V1;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -58,7 +59,7 @@ namespace LibriaDbSync.LibApi.V2
                     genres = c.genres,
                     id = c.id,
                     //last =
-                    LastModified = c.updated,
+                    LastModified = c.updated ?? c.last_change ?? Shared.ToUnixTimeStamp(DateTime.Now),
                     moon = c.player.alternative_player,
                     names = new List<string>
                     {
