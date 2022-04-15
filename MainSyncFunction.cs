@@ -18,9 +18,9 @@ namespace LibriaDbSync
         public static async Task Kick([HttpTrigger(Microsoft.Azure.WebJobs.Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = null)] Microsoft.AspNetCore.Http.HttpRequest req, ILogger log) => await Run(null, log);
 #endif
 
-        //[FunctionName("MainSyncFunction")]
+        [FunctionName("MainSyncFunction")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Azure API")]
-        public static async Task Run(TimerInfo myTimer, ILogger log)
+        public static async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}.");
 
