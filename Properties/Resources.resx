@@ -146,7 +146,7 @@
         display: {displibria};
     }
     &lt;/style&gt;
-    &lt;img class="poster" src="https://static.anilibria.tv{poster}" /&gt;
+    &lt;img class="poster" src="{poster}" /&gt;
     &lt;H1&gt;{releasetitle}&lt;/H1&gt;
     &lt;H2&gt;{episodetitle}&lt;/H2&gt;
     &lt;hr&gt;

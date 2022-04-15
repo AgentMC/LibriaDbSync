@@ -32,9 +32,9 @@ namespace LibriaDbSync
                         new XElement("docs", "http://validator.w3.org/feed/docs/rss2.html"),
                         new XElement("ttl", "15"),
                         new XElement("image",
-                            new XElement("url", "https://static.anilibria.tv/img/footer.png"),
+                            new XElement("url", $"{Shared.StaticHost}/img/footer.png"),
                             new XElement("title", "Anilibria — Спасибо, что выбираете нас!"),
-                            new XElement("link", "https://www.anilibria.tv")));
+                            new XElement("link", $"{Shared.StaticHost}")));
 
             foreach (var episode in entries)
             {
@@ -104,10 +104,10 @@ namespace LibriaDbSync
             {"{genres}",        e => string.Join(", ", e.Release.genres) },
             //{"{voicers}",       e => string.Join(", ", e.Release.voices.Select(DeHtmlize)) },
             {"{description}",   e => e.Release.description},
-            {"{releaselink}",   e => $"https://www.anilibria.tv/release/{e.Release.code}.html" },
+            {"{releaselink}",   e => $"{Shared.StaticHost}/release/{e.Release.code}.html" },
             {"{pikreleaselink}",e => $"http://animepik.org/anime/{e.Release.id}" },
-            {"{poster}",        e => e.Release.poster },
-            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""https://static.anilibria.tv{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) },
+            {"{poster}",        e => $"{Shared.StaticHost}{e.Release.poster}" },
+            {"{torrentlinks}",  e => string.Concat(e.Release.torrents.Select(t=>$@"<li><a href=""{Shared.StaticHost}{t.url}"">{FactoryShared.BuildTorrentTitle(t)}</a></li>")) },
             {"{displibria}",    e => Display(!e.Release.blockedInfo.bakanim) },
             {"{dispbaka}",      e => Display(e.Release.blockedInfo.bakanim) }
         };
