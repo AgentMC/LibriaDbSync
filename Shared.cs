@@ -27,7 +27,7 @@ namespace LibriaDbSync
         private static readonly Func<ILibriaExtractor>[] Extractors = new Func<ILibriaExtractor>[] 
         { 
             () => new LibriaExtractorV1(), 
-            //() => new LibriaExtractorV2() 
+            () => new LibriaExtractorV2() 
         };
 
         internal static ILibriaExtractor GetExtractor() => Extractors[^1]();
