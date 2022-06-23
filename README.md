@@ -30,6 +30,7 @@ Complies with RSS 2.0 specification. However, feed is not 100% compatible becaus
  - Azure function, timer triggered - synchronizer. Each 15 minutes gets last 50 updated releases from Anilibria API, and updates the information on them to the Sql DB.
      - Initial synchronization was performed using the Anilibria UWP application Azure API (it has a bug and always returns *entire* DB :)) to minimize the public site impact.
      - Unfortunately because of the bug, it is not possible to use it for the regular updates.
-     - Libria API v.2.x.x is used
+     - Libria API v.2.x.x is used; for emergency cases, backward-compatible www.anilibria.tv/index.php-based Extractor v1 is preserved in the code.
  - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 50 episodes recorded on the Sql DB.
  - Azure function, HTTP endpoint, at the above mentioned feed address. Manually generates the RSS feed from the last 100 torrents (50 releases) recorded on the Sql DB.
+ Note: Azure function runtime is updated to v4/NET6.
