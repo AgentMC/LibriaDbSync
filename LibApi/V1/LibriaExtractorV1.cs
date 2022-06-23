@@ -22,7 +22,9 @@ namespace LibriaDbSync.LibApi.V1
                 { "page", "1" },
                 { "perPage", quantity.ToString() }
             };
+#pragma warning disable SYSLIB0014 // Type or member is obsolete: it's a legacy backup extractor
             var wc = new System.Net.WebClient();
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
             var bytes = await wc.UploadValuesTaskAsync(endpoint, col);
             var jText = Encoding.UTF8.GetString(bytes);
 
