@@ -21,7 +21,12 @@ namespace LibriaDbSync.LibApi.V2
             var response = await client.GetAsync(endpoint);
             var jText = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
+            if ((jText[0] != '{' && jText[0] != '[') || jText[^1] - 2 != jText[0])
+            {
+                result.status = false;
+                result.error = jText;
+            }
+            else if (response.IsSuccessStatusCode)
             {
                 var releaseList = JsonConvert.DeserializeObject<Changes>(jText);
                 MapV1Model(result, releaseList);

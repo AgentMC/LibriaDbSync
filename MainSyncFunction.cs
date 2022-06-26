@@ -30,10 +30,10 @@ namespace LibriaDbSync
             var (model, responseText) = await extractor.Extract(Shared.Threshold);
             log.LogInformation($"Text content received, length {responseText.Length}.");
 
-            if (model?.data?.items == null)
+            if (model?.status == false || model?.data?.items == null)
             {
-                log.LogError($"Bad response. The response text is {responseText}.");
-                throw new Exception("Unable to sync the DB. Response received contains invalid data.");
+                log.LogError($"Bad response. The error/response text is '{model?.error ?? responseText}'.");
+                throw new LibriaDependencyException();
             }
             if (model.data.items.Count == 0)
             {

@@ -111,6 +111,10 @@ namespace LibriaDbSync.LibApi.V2
     public class ErrorModel
     {
         public Error error { get; set; }
+        public override string ToString()
+        {
+            return $"[{(error == null ? "in" : string.Empty)}valid error] code '{error?.code}', message '{error?.Message}'.";
+        }
     }
     public class Error
     {
