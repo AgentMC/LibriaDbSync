@@ -69,14 +69,14 @@ namespace LibriaDbSync.LibApi.V2
     }
     public class SeriesInfo
     {
-        public short? first { get; set; }
-        public short? last { get; set; }
+        public float? first { get; set; }
+        public float? last { get; set; }
         public string @string { get; set; }
 
     }
     public class EpisodeInfo
     {
-        public int serie { get; set; }
+        public float? serie { get; set; }
         public long created_timestamp { get; set; }
         public Dictionary<string, string> hls { get; set; }
     }

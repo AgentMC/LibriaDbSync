@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace LibriaDbSync.LibApi.V2
             return (result, jText);
         }
 
-        private void MapV1Model(LibriaModel model, Changes v2ChangesModel)
+        private static void MapV1Model(LibriaModel model, Changes v2ChangesModel)
         {
             model.status = true;
             model.data = new Data
@@ -99,17 +100,25 @@ namespace LibriaDbSync.LibApi.V2
             };
         }
 
-        private List<Episode> PlayerDataToPLaylist(Player player)
+        private static List<Episode> PlayerDataToPLaylist(Player player)
         {
             string tryGetUrl(EpisodeInfo e, string key) => e.hls.TryGetValue(key, out var url) ? $"https://{player.host}{url}" : null;
-            return player.playlist.Select(e => new Episode
+
+            var result = new List<Episode>();
+            int idCounter = int.MinValue;
+            foreach (var episodeEntry in player.playlist)
             {
-                id = e.Value.serie,
-                title = int.TryParse(e.Key, out _) ? $"Серия {e.Key}" : e.Key,
-                fullhd = tryGetUrl(e.Value, "fhd"),
-                hd = tryGetUrl(e.Value, "hd"),
-                sd = tryGetUrl(e.Value, "sd")
-            }).ToList();
+                idCounter = idCounter == int.MinValue ? (int)Math.Floor(episodeEntry.Value.serie ?? 0) : idCounter + 1;
+                result.Add(new Episode
+                {
+                    id = idCounter,
+                    title = float.TryParse(episodeEntry.Key,NumberStyles.Number, CultureInfo.InvariantCulture, out _) ? $"Серия {episodeEntry.Key}" : episodeEntry.Key,
+                    fullhd = tryGetUrl(episodeEntry.Value, "fhd"),
+                    hd = tryGetUrl(episodeEntry.Value, "hd"),
+                    sd = tryGetUrl(episodeEntry.Value, "sd")
+                });
+            }
+            return result;
         }
     }
 }
