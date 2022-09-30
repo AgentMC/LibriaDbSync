@@ -85,13 +85,21 @@ namespace LibriaDbSync
                         {
                             ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIdsDb, "torrents set changed");
                         }
-                        else if (!torrentIdsDb.Item2.SequenceEqual(torrentsApi.Select(t => t.ctime)))
+                        else if (!CompareTorrentTimestamps(torrentIdsDb, torrentsApi))
                         {
                             ProceedUpdate(conn, release, log, maxEpisodeUpdate, torrentIdsDb, "torrents updated in-place");
                         }
                     }
                 }
             }
+        }
+
+        private static bool CompareTorrentTimestamps(TorrentsData torrentsDb, List<Torrent> torrentsApi)
+        {
+            var pairs = torrentsDb.Item1.Zip(torrentsDb.Item2).ToList();
+            return torrentsApi.Where(t => t.ctime > 0)
+                              .Select(t => (t.id, t.ctime))
+                              .All(pairs.Contains);
         }
 
         private static void ProceedUpdate(SqlConnection conn, Release release, ILogger log, long maxEpisodeUpdate, TorrentsData torrentIds, string reason)
@@ -246,7 +254,7 @@ namespace LibriaDbSync
             foreach (var torrent in release.torrents.Where(t => !existingIds.Item1.Contains(t.id)))
             {
                 log.LogInformation($"+++Creating torrent {torrent.id}.");
-                var createdTimestamp = CheckTimeStamp(torrent.ctime, 36, "Torrent date out of range. Clamping", log);
+                var createdTimestamp = torrent.ctime > 0 ? torrent.ctime : CheckTimeStamp(torrent.ctime, 36, "Torrent date out of range. Clamping", log);
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = $"Insert into Torrents (Id, ReleaseId, Created) Values (@id, @release, @created)";
