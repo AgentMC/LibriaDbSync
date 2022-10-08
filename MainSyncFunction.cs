@@ -198,17 +198,17 @@ namespace LibriaDbSync
                                     SELECT Id FROM Episodes WHERE ReleaseId = @id";
                 cmd.Parameters.AddWithValue("@id", release.id);
                 cmd.Parameters.AddWithValue("@titles", JsonConvert.SerializeObject(release.names));
-                cmd.Parameters.AddWithValue("@poster", release.poster);
+                cmd.Parameters.AddWithValue("@poster", release.poster ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@lastmodified", release.LastModified);
                 cmd.Parameters.AddWithValue("@statuscode", release.StatusCode);
                 cmd.Parameters.AddWithValue("@genres", JsonConvert.SerializeObject(release.genres));
                 cmd.Parameters.AddWithValue("@voicers", JsonConvert.SerializeObject(release.voices));
                 cmd.Parameters.AddWithValue("@year", release.Year);
-                cmd.Parameters.AddWithValue("@season", release.season);
-                cmd.Parameters.AddWithValue("@description", release.description);
+                cmd.Parameters.AddWithValue("@season", release.season ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@description", release.description ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@torrents", JsonConvert.SerializeObject(release.torrents));
                 cmd.Parameters.AddWithValue("@rating", release.favorite.rating);
-                cmd.Parameters.AddWithValue("@code", release.code);
+                cmd.Parameters.AddWithValue("@code", release.code); //can't be null
                 cmd.Parameters.AddWithValue("@bakanim", release.blockedInfo?.bakanim ?? false);
                 using (var rdr = cmd.ExecuteReader())
                 {
@@ -290,7 +290,7 @@ namespace LibriaDbSync
                 cmd.CommandText = "Insert into Episodes (Id, ReleaseId, Title, Links, Created) Values (@id, @release, @title, @links, @created)";
                 cmd.Parameters.AddWithValue("@id", new PackedId(releaseId: releaseId, episodeId: episode.id).Pack());
                 cmd.Parameters.AddWithValue("@release", releaseId);
-                cmd.Parameters.AddWithValue("@title", episode.title);
+                cmd.Parameters.AddWithValue("@title", episode.title ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@links", JsonConvert.SerializeObject(episode));
                 cmd.Parameters.AddWithValue("@created", createdStamp);
                 cmd.ExecuteNonQuery();
