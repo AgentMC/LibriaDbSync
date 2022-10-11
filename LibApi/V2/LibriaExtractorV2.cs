@@ -106,13 +106,13 @@ namespace LibriaDbSync.LibApi.V2
 
             var result = new List<Episode>();
             int idCounter = int.MinValue;
-            foreach (var episodeEntry in player.playlist)
+            foreach (var episodeEntry in player.playlist.OrderBy(e => e.Value.created_timestamp))
             {
                 idCounter = idCounter == int.MinValue ? (int)Math.Floor(episodeEntry.Value.serie ?? 0) : idCounter + 1;
                 result.Add(new Episode
                 {
                     id = idCounter,
-                    title = float.TryParse(episodeEntry.Key,NumberStyles.Number, CultureInfo.InvariantCulture, out _) ? $"Серия {episodeEntry.Key}" : episodeEntry.Key,
+                    title = float.TryParse(episodeEntry.Key, NumberStyles.Number, CultureInfo.InvariantCulture, out _) ? $"Серия {episodeEntry.Key}" : episodeEntry.Key,
                     fullhd = tryGetUrl(episodeEntry.Value, "fhd"),
                     hd = tryGetUrl(episodeEntry.Value, "hd"),
                     sd = tryGetUrl(episodeEntry.Value, "sd")
