@@ -177,7 +177,7 @@ namespace LibriaDbSync
         {
             int digitGroups = 0;
             bool isDigit = false;
-            foreach (var c in episodeSetDescription)
+            foreach (var c in episodeSetDescription ?? string.Empty)
             {
                 if (char.IsDigit(c) != isDigit)
                 {
