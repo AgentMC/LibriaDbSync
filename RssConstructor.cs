@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 
 namespace LibriaDbSync
@@ -52,14 +53,14 @@ namespace LibriaDbSync
             {
                 id = (int)rdr["Rid"],
                 names = JsonConvert.DeserializeObject<List<string>>((string)rdr["Titles"]),
-                code = (string)rdr["Code"],
-                description = (string)rdr["Description"],
-                poster = (string)rdr["Poster"],
+                code = rdr.GetValueAs<string>("Code"),
+                description = rdr.GetValueAs<string>("Description"),
+                poster = rdr.GetValueAs<string>("Poster"),
                 StatusCode = (byte)rdr["StatusCode"],
                 genres = JsonConvert.DeserializeObject<List<string>>((string)rdr["Genres"]),
                 voices = JsonConvert.DeserializeObject<List<string>>((string)rdr["Voicers"]),
                 Year = (short)rdr["Year"],
-                season = (string)rdr["Season"],
+                season = rdr.GetValueAs<string>("Season"),
                 torrents = JsonConvert.DeserializeObject<List<Torrent>>((string)rdr["Torrents"]),
                 blockedInfo = new BlockedInfo { bakanim = rdr["Baka"] as bool? ?? false }
             };
@@ -74,13 +75,13 @@ namespace LibriaDbSync
                                                    FROM Episodes JOIN Releases ON Releases.Id = ReleaseId
                                                    ORDER BY Created DESC";
 
-        protected override RssEntry InitializeRssEntryTopFields(SqlDataReader sqlReader)
+        protected override RssEntry InitializeRssEntryTopFields(SqlDataReader rdr)
         {
             return new RssEntry
             {
-                Uid = (int)sqlReader["Uid"],
-                Title = (string)sqlReader["Title"],
-                Created = (long)sqlReader["Created"]
+                Uid = (int)rdr["Uid"],
+                Title = rdr.GetValueAs<string>("Title"),
+                Created = (long)rdr["Created"]
             };
         }
     }

@@ -18,6 +18,12 @@ namespace LibriaDbSync
             return connection;
         }
 
+        internal static T GetValueAs<T>(this SqlDataReader reader, string key) 
+        {
+            object o = reader[key];
+            return DBNull.Value.Equals(o) ? default : (T)o;
+        }
+
         internal static DateTime ToDateTime(this long seconds) => new DateTime(1970, 1, 1).AddSeconds(seconds);
 
         internal static string ToRssDateTimeString(this long seconds) => ToDateTime(seconds).ToString("R");
