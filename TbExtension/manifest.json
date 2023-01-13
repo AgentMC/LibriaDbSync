@@ -1,0 +1,23 @@
+{
+  "name": "Copy exracted content",
+  "description": "Copies content from selected messages by a regex",
+  "version": "1.1",
+  "applications": {
+    "gecko": {
+      "id": "copycat@extensions.thunderbird.net",
+      "strict_min_version": "80.0"
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "menus",
+    "messagesRead",
+    "clipboardWrite"
+  ],
+  "default_locale": "en",
+  "manifest_version": 2
+}
