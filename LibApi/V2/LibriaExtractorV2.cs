@@ -75,7 +75,7 @@ namespace LibriaDbSync.LibApi.V2
                     playlist = PlayerDataToPLaylist(c.player),
                     poster = c.posters.medium.url,
                     season = c.season.@string,
-                    series = c.player.series.@string,
+                    series = c.player.Series.@string,
                     status = c.status.@string,
                     //statusCode= 
                     StatusCode = c.status.code.GetValueOrDefault(),
@@ -88,7 +88,7 @@ namespace LibriaDbSync.LibApi.V2
                         leechers = t.leechers.GetValueOrDefault(),
                         quality = t.quality.@string,
                         seeders = t.seeders.GetValueOrDefault(),
-                        series = t.series.@string,
+                        series = t.Series.@string,
                         size = t.total_size,
                         url = t.url
                     }).ToList(),

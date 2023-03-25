@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace LibriaDbSync.LibApi.V2
 {
@@ -63,12 +64,14 @@ namespace LibriaDbSync.LibApi.V2
     {
         public string alternative_player { get; set; }
         public string host { get; set; }
-        public SeriesInfo series { get; set; }
+        public JToken series { get; set; }
+        public SeriesInfo Series { get { return (series as JObject)?.ToObject<SeriesInfo>() ?? SeriesInfo.Empty; } }
         public Dictionary<string, EpisodeInfo> playlist { get; set; }
 
     }
     public class SeriesInfo
     {
+        public static readonly SeriesInfo Empty = new();
         public float? first { get; set; }
         public float? last { get; set; }
         public string @string { get; set; }
@@ -83,7 +86,8 @@ namespace LibriaDbSync.LibApi.V2
     public class Torrent : Imaginable
     {
         public int torrent_id { get; set; }
-        public SeriesInfo series { get; set; }
+        public JToken series { get; set; }
+        public SeriesInfo Series { get { return (series as JObject)?.ToObject<SeriesInfo>() ?? SeriesInfo.Empty; } }
         public VideoQuality quality { get; set; }
         public int? leechers { get; set; }
         public int? seeders { get; set; }
@@ -103,7 +107,8 @@ namespace LibriaDbSync.LibApi.V2
     }
     public class TorrentList
     {
-        public SeriesInfo series { get; set; }
+        public JToken series { get; set; }
+        public SeriesInfo Series { get { return (series as JObject)?.ToObject<SeriesInfo>() ?? SeriesInfo.Empty; } }
         public List<Torrent> list { get; set; }
     }
 

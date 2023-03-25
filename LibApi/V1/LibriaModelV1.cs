@@ -8,7 +8,8 @@ namespace LibriaDbSync.LibApi.V1
     {
         public bool blocked { get; set; }
         public object reason { get; set; }
-        public bool bakanim { get; set; }
+        private bool _baka_internal;
+        public bool bakanim { get => _baka_internal || blocked; set { _baka_internal = value; } }
     }
 
     public class Episode
